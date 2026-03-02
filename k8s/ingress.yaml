@@ -1,0 +1,48 @@
+# Ingress for Water Access Optimizer
+# Requires an Ingress Controller (e.g., nginx-ingress, traefik)
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: water-optimizer-ingress
+  namespace: water-optimizer
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"  # If using cert-manager
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "15m"  # For file uploads
+spec:
+  tls:
+  - hosts:
+    - water-optimizer.example.com  # Replace with your domain
+    secretName: water-optimizer-tls
+  rules:
+  - host: water-optimizer.example.com  # Replace with your domain
+    http:
+      paths:
+      # Frontend
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+
+      # Auth Service API
+      - path: /api/v1/auth
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-service
+            port:
+              number: 8081
+
+      # Data Service API
+      - path: /api/v1
+        pathType: Prefix
+        backend:
+          service:
+            name: data-service
+            port:
+              number: 8087

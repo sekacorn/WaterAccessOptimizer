@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!-- Console Appender (Human Readable for Development) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} [request_id=%X{request_id}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- File Appender (JSON for Production) -->
+    <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/var/log/water-optimizer/auth-service.json</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/var/log/water-optimizer/auth-service.%d{yyyy-MM-dd}.json.gz</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>true</includeContext>
+            <includeMdc>true</includeMdc>
+            <customFields>{"service":"auth-service"}</customFields>
+        </encoder>
+    </appender>
+
+    <!-- Root Logger -->
+    <springProfile name="dev,local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod,production">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE_JSON"/>
+        </root>
+    </springProfile>
+
+    <!-- Application Loggers -->
+    <logger name="com.water" level="DEBUG"/>
+    <logger name="org.springframework.security" level="DEBUG"/>
+</configuration>

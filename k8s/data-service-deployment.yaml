@@ -1,0 +1,100 @@
+# Data Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-service
+  namespace: water-optimizer
+  labels:
+    app: data-service
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: data-service
+  template:
+    metadata:
+      labels:
+        app: data-service
+        tier: backend
+    spec:
+      containers:
+      - name: data-service
+        image: water-optimizer/data-service:latest  # Replace with your registry
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8087
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: water-optimizer-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://postgres:5432/$(POSTGRES_DB)"
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: water-optimizer-config
+              key: POSTGRES_USER
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: water-optimizer-secrets
+              key: POSTGRES_PASSWORD
+        - name: AUTH_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: water-optimizer-config
+              key: AUTH_SERVICE_URL
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: water-optimizer-config
+              key: DATA_SERVICE_PORT
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: water-optimizer-config
+              key: POSTGRES_DB
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8087
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8087
+          initialDelaySeconds: 40
+          periodSeconds: 5
+          timeoutSeconds: 3
+
+---
+# Data Service Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-service
+  namespace: water-optimizer
+  labels:
+    app: data-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8087
+    targetPort: 8087
+    protocol: TCP
+    name: http
+  selector:
+    app: data-service

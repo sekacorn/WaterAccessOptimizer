@@ -1,0 +1,6 @@
+community_name,latitude,longitude,population,water_access_level,primary_water_source,household_count,collection_date,source
+Kasubi Village,0.3450,32.5800,1200,limited,well,240,2024-01-05,Field Survey
+Nakawa Settlement,0.3550,32.5900,850,none,surface_water,170,2024-01-05,Field Survey
+Makerere Community,0.3350,32.6000,2100,basic,borehole,420,2024-01-05,Field Survey
+Kololo Estate,0.3380,32.6100,450,safely_managed,piped_water,90,2024-01-05,Field Survey
+Butabika Village,0.3520,32.6150,1850,limited,well,370,2024-01-06,Field Survey

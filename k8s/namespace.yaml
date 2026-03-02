@@ -1,0 +1,8 @@
+# Kubernetes Namespace for Water Access Optimizer
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: water-optimizer
+  labels:
+    name: water-optimizer
+    environment: production

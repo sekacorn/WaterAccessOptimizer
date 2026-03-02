@@ -1,0 +1,35 @@
+{
+  "community_id": "550e8400-e29b-41d4-a716-446655440000",
+  "community_name": "Kalondama",
+  "population": 5000,
+  "latitude": -12.345,
+  "longitude": 18.678,
+  "water_quality": {
+    "ph_level": 5.2,
+    "turbidity_ntu": 18,
+    "coliform_status": "PRESENT",
+    "fluoride_mg_l": 2.5,
+    "arsenic_mg_l": 0.015,
+    "nitrate_mg_l": 45,
+    "measurement_date": "2024-01-15"
+  },
+  "infrastructure": {
+    "facility_type": "borehole",
+    "operational_status": "needs_repair",
+    "installation_date": "2010-03-15",
+    "last_maintenance": "2022-06-15",
+    "capacity_l_per_day": 8000,
+    "distance_to_community_m": 2500
+  },
+  "access": {
+    "distance_to_source_m": 2500,
+    "average_wait_time_minutes": 45,
+    "seasonal_availability": "dry_season_issues"
+  },
+  "environment": {
+    "climate_zone": "semi-arid",
+    "annual_rainfall_mm": 450,
+    "drought_frequency": "frequent",
+    "flood_risk": "low"
+  }
+}

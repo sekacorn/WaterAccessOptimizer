@@ -1,0 +1,7 @@
+facility_type,facility_name,latitude,longitude,operational_status,capacity,capacity_unit,population_served,installation_date,source
+borehole,Borehole Alpha,0.3476,32.5825,operational,3000,liters_per_day,500,2020-03-15,Field Survey
+borehole,Borehole Beta,0.3512,32.5901,non_operational,2500,liters_per_day,0,2018-06-20,Field Survey
+well,Community Well Delta,0.3550,32.5950,under_maintenance,1000,liters_per_day,200,2017-09-05,Field Survey
+treatment_plant,Central Treatment Facility,0.3600,32.6020,operational,50000,liters_per_day,2500,2019-01-10,Field Survey
+water_tower,Kampala Water Tower,0.3350,32.6000,operational,2000000,liters,5000,2015-05-20,Field Survey
+pump_station,Kololo Pump Station,0.3380,32.6100,operational,30000,liters_per_hour,3000,2021-11-12,Field Survey

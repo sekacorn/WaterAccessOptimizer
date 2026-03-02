@@ -1,0 +1,99 @@
+server:
+  port: 8080
+
+# JWT Configuration (MVP v0.1.0)
+jwt:
+  secret: ${JWT_SECRET:changeme-this-is-a-very-long-secret-key-for-jwt-signing-minimum-256-bits}
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        # Water Integrator Service
+        - id: water-integrator
+          uri: ${WATER_INTEGRATOR_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/integrator/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: water-integrator
+                fallbackUri: forward:/fallback
+
+        # Water Visualizer Service
+        - id: water-visualizer
+          uri: ${WATER_VISUALIZER_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/visualizer/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: water-visualizer
+                fallbackUri: forward:/fallback
+
+        # Auth Service (MVP v0.1.0)
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: auth-service
+                fallbackUri: forward:/fallback
+
+        # LLM Service
+        - id: llm-service
+          uri: ${LLM_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/llm/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: llm-service
+                fallbackUri: forward:/fallback
+
+        # Collaboration Service
+        - id: collaboration-service
+          uri: ${COLLABORATION_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/collaboration/**,/ws/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: collaboration-service
+                fallbackUri: forward:/fallback
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+
+# Logging
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: INFO
+
+# Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,gateway
+  endpoint:
+    health:
+      show-details: always

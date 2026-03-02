@@ -1,0 +1,117 @@
+{
+  "assessment_id": "deterministic-test-id",
+  "community_id": "550e8400-e29b-41d4-a716-446655440000",
+  "community_name": "Kalondama",
+  "composite_score": 87.3,
+  "risk_level": "HIGH",
+  "assessed_at": "2024-01-20T10:00:00Z",
+  "factor_scores": {
+    "water_quality": 32.5,
+    "infrastructure": 18.2,
+    "population": 15.0,
+    "access": 12.1,
+    "environment": 9.5
+  },
+  "factor_details": {
+    "water_quality": {
+      "score": 32.5,
+      "issues": [
+        "Low pH (5.2) - Acidic water",
+        "High turbidity (18 NTU) - Above WHO guideline of 5 NTU",
+        "Coliform bacteria present - Contamination risk",
+        "Nitrate levels elevated (45 mg/L) - Near WHO limit of 50 mg/L"
+      ],
+      "severity": "HIGH"
+    },
+    "infrastructure": {
+      "score": 18.2,
+      "issues": [
+        "Infrastructure needs repair",
+        "No maintenance in >18 months",
+        "Capacity may be insufficient for population",
+        "Distance to community exceeds 1km"
+      ],
+      "severity": "HIGH"
+    },
+    "population": {
+      "score": 15.0,
+      "issues": [
+        "Large population (5000) dependent on single source",
+        "High vulnerability to service disruption"
+      ],
+      "severity": "MEDIUM"
+    },
+    "access": {
+      "score": 12.1,
+      "issues": [
+        "Distance to water source >1km",
+        "Long wait times (45 minutes average)",
+        "Seasonal availability issues"
+      ],
+      "severity": "MEDIUM"
+    },
+    "environment": {
+      "score": 9.5,
+      "issues": [
+        "Semi-arid climate with low rainfall",
+        "Frequent droughts increase stress"
+      ],
+      "severity": "MEDIUM"
+    }
+  },
+  "recommendations": [
+    {
+      "priority": "high",
+      "action": "Repair infrastructure within 30 days",
+      "rationale": "Non-operational infrastructure serving 5000 people creates immediate health risk",
+      "estimated_cost": 5000.00,
+      "estimated_impact": "Risk reduction: -35 points",
+      "timeframe": "Immediate (0-30 days)"
+    },
+    {
+      "priority": "high",
+      "action": "Address water quality issues - disinfection system",
+      "rationale": "Coliform contamination and water quality parameters exceed safe limits",
+      "estimated_cost": 3000.00,
+      "estimated_impact": "Risk reduction: -25 points",
+      "timeframe": "Immediate (0-30 days)"
+    },
+    {
+      "priority": "medium",
+      "action": "Construct additional water point closer to community",
+      "rationale": "Reduce access distance from 2.5km to <1km",
+      "estimated_cost": 15000.00,
+      "estimated_impact": "Risk reduction: -12 points",
+      "timeframe": "Short-term (30-90 days)"
+    },
+    {
+      "priority": "medium",
+      "action": "Implement regular maintenance schedule",
+      "rationale": "Prevent future infrastructure failures",
+      "estimated_cost": 500.00,
+      "estimated_impact": "Long-term sustainability",
+      "timeframe": "Ongoing"
+    },
+    {
+      "priority": "low",
+      "action": "Water conservation education program",
+      "rationale": "Reduce demand pressure during dry season",
+      "estimated_cost": 1000.00,
+      "estimated_impact": "Behavioral change",
+      "timeframe": "Medium-term (3-6 months)"
+    }
+  ],
+  "alerts": [
+    {
+      "level": "CRITICAL",
+      "message": "Immediate intervention required",
+      "triggered_by": "composite_score > 80 AND infrastructure_needs_repair"
+    },
+    {
+      "level": "HIGH",
+      "message": "Water quality contamination detected",
+      "triggered_by": "coliform_present"
+    }
+  ],
+  "next_assessment_recommended": "2024-02-20T10:00:00Z"
+}

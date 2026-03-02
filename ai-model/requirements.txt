@@ -1,0 +1,25 @@
+# Python dependencies for AI Model Service
+
+# Web framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+
+# Deep learning
+torch==2.1.2
+torchvision==0.16.2
+
+# Data processing
+numpy==1.26.3
+pandas==2.2.0
+
+# Model validation
+pydantic==2.5.3
+
+# System monitoring
+psutil==5.9.7
+
+# HTTP client (for external API calls if needed)
+httpx==0.26.0
+
+# Environment variables
+python-decouple==3.8

@@ -1,0 +1,60 @@
+# Docker Compose - Development Profile
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+version: '3.8'
+
+services:
+  # Override for development with hot-reload
+  water-integrator:
+    build:
+      context: ./backend/water-integrator
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./backend/water-integrator/src:/app/src:ro
+      - maven-cache:/root/.m2
+    environment:
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+      SPRING_PROFILES_ACTIVE: dev
+      LOG_LEVEL: DEBUG
+
+  auth-service:
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./backend/auth-service/src:/app/src:ro
+      - maven-cache:/root/.m2
+    environment:
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+      SPRING_PROFILES_ACTIVE: dev
+      LOG_LEVEL: DEBUG
+
+  water-visualizer:
+    build:
+      context: ./backend/water-visualizer
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./backend/water-visualizer/src:/app/src:ro
+      - maven-cache:/root/.m2
+    environment:
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+      SPRING_PROFILES_ACTIVE: dev
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./frontend/src:/app/src:ro
+      - /app/node_modules
+    environment:
+      VITE_HOT_RELOAD: "true"
+      NODE_ENV: development
+    command: npm run dev -- --host
+
+volumes:
+  maven-cache:

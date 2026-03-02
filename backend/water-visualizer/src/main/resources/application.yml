@@ -1,0 +1,54 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: water-visualizer
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/wateraccess}
+    username: ${SPRING_DATASOURCE_USERNAME:wateradmin}
+    password: ${SPRING_DATASOURCE_PASSWORD:waterpass123}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.spatial.dialect.postgis.PostgisDialect
+        format_sql: true
+
+# AI Service Configuration
+ai:
+  service:
+    url: ${AI_SERVICE_URL:http://localhost:8000}
+    timeout: 30000
+
+# Visualization Settings
+visualization:
+  export:
+    formats: png,svg,stl
+    max-resolution: 4096
+
+# Logging
+logging:
+  level:
+    com.water: DEBUG
+    org.springframework: INFO
+    org.hibernate: WARN
+
+# Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always

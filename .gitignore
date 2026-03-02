@@ -1,0 +1,98 @@
+# WaterAccessOptimizer .gitignore
+
+# Environment and local config
+.env
+.env.*
+!.env.example
+*.local
+
+# IDE/editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backend (Java / Maven / Spring)
+backend/**/target/
+backend/**/*.class
+backend/**/*.jar
+backend/**/*.war
+backend/**/*.ear
+backend/**/logs/
+backend/**/*.log
+.mvn/timing.properties
+
+# Frontend (Node / Vite / Playwright / Vitest)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.cache/
+frontend/coverage/
+frontend/.nyc_output/
+frontend/playwright-report/
+frontend/test-results/
+frontend/.eslintcache
+frontend/*.log
+
+# Python (ai-model)
+ai-model/__pycache__/
+ai-model/**/*.pyc
+ai-model/**/*.pyo
+ai-model/**/*.pyd
+ai-model/.Python
+ai-model/.venv/
+ai-model/venv/
+ai-model/env/
+ai-model/.pytest_cache/
+ai-model/.mypy_cache/
+ai-model/.ruff_cache/
+ai-model/.coverage*
+ai-model/htmlcov/
+ai-model/*.egg-info/
+
+# AI model artifacts (large binaries)
+ai-model/model.pt
+ai-model/*.pkl
+ai-model/*.h5
+ai-model/*.onnx
+
+# Logs
+logs/
+*.log
+
+# Temp / cache
+*.tmp
+*.temp
+*.bak
+.tmp/
+.cache/
+
+# Test / coverage artifacts
+coverage/
+.nyc_output/
+htmlcov/
+
+# Generic build artifacts
+dist/
+build/
+out/
+
+# Database artifacts
+database/data/
+*.sql.backup
+
+# Secrets and certificates
+*.pem
+*.key
+*.crt
+credentials.json
+secrets/
+
+# Optional local docs/artifacts
+ITERATION_*_CHANGELOG.md

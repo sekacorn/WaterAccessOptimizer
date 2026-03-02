@@ -1,0 +1,142 @@
+groups:
+  - name: water_optimizer_alerts
+    interval: 30s
+    rules:
+      # Service Down Alert
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} has been down for more than 1 minute."
+
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) by (service)
+            / sum(rate(http_server_requests_seconds_count[5m])) by (service) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on {{ $labels.service }} (>5%)"
+          description: "Error rate is {{ $value | humanizePercentage }}"
+
+      # Slow API Response (P95 > 2s)
+      - alert: SlowAPIResponse
+        expr: |
+          histogram_quantile(0.95,
+            rate(http_server_requests_seconds_bucket[5m])
+          ) > 2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API response time >2s (p95) on {{ $labels.service }}"
+          description: "P95 latency is {{ $value }}s"
+
+      # Database Connection Pool Near Exhaustion
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          hikaricp_connections_active / hikaricp_connections_max > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database connection pool >90% utilized on {{ $labels.service }}"
+          description: "{{ $labels.pool }} has {{ $value | humanizePercentage }} connections used"
+
+      # High JVM Memory Usage
+      - alert: HighJVMMemoryUsage
+        expr: |
+          (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High JVM heap usage on {{ $labels.service }} (>85%)"
+          description: "Heap memory usage is {{ $value | humanizePercentage }}"
+
+      # High Login Failure Rate
+      - alert: HighLoginFailureRate
+        expr: |
+          sum(rate(water_auth_login_failure[5m]))
+            / (sum(rate(water_auth_login_success[5m])) + sum(rate(water_auth_login_failure[5m]))) > 0.2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High login failure rate (>20%)"
+          description: "Login failure rate is {{ $value | humanizePercentage }}. Possible brute force attack or auth service issue."
+
+      # Database Down
+      - alert: DatabaseUnreachable
+        expr: |
+          spring_boot_actuator_health_status{component="db"} != 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database unreachable from {{ $labels.service }}"
+          description: "Database connection health check failing"
+
+      # Redis Down
+      - alert: RedisUnreachable
+        expr: |
+          redis_up == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis is down"
+          description: "Redis connection is unavailable. Sessions and caching may be affected."
+
+      # High Request Rate (possible DDoS)
+      - alert: UnusuallyHighRequestRate
+        expr: |
+          sum(rate(http_server_requests_seconds_count[5m])) by (service) > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unusually high request rate on {{ $labels.service }} (>1000 rps)"
+          description: "Request rate is {{ $value }} requests/second. Possible DDoS or traffic spike."
+
+      # Long Garbage Collection Pauses
+      - alert: LongGCPauses
+        expr: |
+          rate(jvm_gc_pause_seconds_sum[5m]) / rate(jvm_gc_pause_seconds_count[5m]) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Long GC pauses on {{ $labels.service }} (avg >500ms)"
+          description: "Average GC pause is {{ $value }}s"
+
+      # File Upload Processing Slow
+      - alert: SlowFileUpload
+        expr: |
+          histogram_quantile(0.95,
+            rate(water_uploads_duration_seconds_bucket[5m])
+          ) > 30
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "File upload processing slow (P95 >30s)"
+          description: "P95 upload time is {{ $value }}s"
+
+      # Risk Assessment Processing Slow
+      - alert: SlowRiskAssessment
+        expr: |
+          histogram_quantile(0.95,
+            rate(water_risk_assessments_duration_seconds_bucket[5m])
+          ) > 60
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Risk assessment processing slow (P95 >60s)"
+          description: "P95 assessment time is {{ $value }}s"

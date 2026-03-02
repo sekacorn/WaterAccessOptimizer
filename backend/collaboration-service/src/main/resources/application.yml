@@ -1,0 +1,44 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: collaboration-service
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/wateraccess}
+    username: ${SPRING_DATASOURCE_USERNAME:wateradmin}
+    password: ${SPRING_DATASOURCE_PASSWORD:waterpass123}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+  redis:
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
+
+# WebSocket Configuration
+websocket:
+  allowed-origins: "*"
+  heartbeat-interval: 25000
+  session-timeout: 300000
+
+# Logging
+logging:
+  level:
+    com.water: DEBUG
+    org.springframework: INFO
+    org.springframework.web.socket: DEBUG
+
+# Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always

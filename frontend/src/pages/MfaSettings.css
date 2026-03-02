@@ -1,0 +1,280 @@
+/**
+ * Styles for MFA Settings Page
+ */
+
+.mfa-settings-page {
+  min-height: 100vh;
+  padding-bottom: var(--spacing-xl);
+}
+
+.mfa-settings-page h1 {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  color: var(--primary);
+}
+
+/* MFA Status Card */
+.mfa-status-card {
+  margin: var(--spacing-xl) 0;
+}
+
+.status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.status-info h2 {
+  color: var(--primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.status-badge-large {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.status-badge-large span {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: 8px;
+}
+
+.status-badge-large .enabled {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-badge-large .disabled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Setup Wizard */
+.setup-wizard {
+  margin: var(--spacing-xl) 0;
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: var(--text-light);
+}
+
+.setup-wizard h2 {
+  color: var(--text-light);
+  margin-bottom: var(--spacing-xl);
+}
+
+.setup-step {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  border-radius: 8px;
+}
+
+.setup-step h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--primary);
+  margin-bottom: var(--spacing-md);
+}
+
+/* QR Code */
+.qr-code-container {
+  display: flex;
+  justify-content: center;
+  margin: var(--spacing-lg) 0;
+  padding: var(--spacing-lg);
+  background-color: white;
+  border-radius: 8px;
+}
+
+.qr-code-container img {
+  max-width: 200px;
+  height: auto;
+}
+
+.or-divider {
+  text-align: center;
+  margin: var(--spacing-lg) 0;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.manual-entry {
+  text-align: center;
+}
+
+.secret-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.secret-code code {
+  font-size: 1.2rem;
+  padding: var(--spacing-md);
+  background-color: var(--bg-secondary);
+  border-radius: 4px;
+  letter-spacing: 2px;
+}
+
+/* Verification Input */
+.verification-input {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  margin-top: var(--spacing-md);
+}
+
+.code-input {
+  flex: 0 0 150px;
+  padding: var(--spacing-md);
+  font-size: 1.5rem;
+  text-align: center;
+  letter-spacing: 8px;
+  border: 2px solid var(--primary);
+  border-radius: 4px;
+}
+
+/* Backup Codes */
+.backup-codes-display {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-md);
+  margin: var(--spacing-lg) 0;
+}
+
+.backup-code {
+  padding: var(--spacing-md);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  text-align: center;
+  font-family: monospace;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.backup-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.warning {
+  padding: var(--spacing-md);
+  background-color: #fff3cd;
+  border-left: 4px solid #856404;
+  color: #856404;
+  border-radius: 4px;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Trusted Devices */
+.devices-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.device-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: var(--bg-secondary);
+  border-radius: 4px;
+  border: 1px solid var(--primary);
+}
+
+.device-info h4 {
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--primary);
+}
+
+.device-info p {
+  margin: var(--spacing-xs) 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.device-ip {
+  font-family: monospace;
+}
+
+.no-devices {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: var(--spacing-lg);
+}
+
+/* Info Card */
+.info-card {
+  margin-top: var(--spacing-xl);
+  background-color: #e7f3ff;
+  border-left: 4px solid var(--primary);
+}
+
+.info-card h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.info-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.info-card li {
+  padding: var(--spacing-sm) 0;
+  padding-left: var(--spacing-lg);
+  position: relative;
+}
+
+.info-card li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--success);
+  font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .status-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .verification-input {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .code-input {
+    flex: 1;
+  }
+
+  .backup-codes-display {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .device-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+}

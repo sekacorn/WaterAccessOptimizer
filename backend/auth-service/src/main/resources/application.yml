@@ -1,0 +1,82 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/wateraccess}
+    username: ${SPRING_DATASOURCE_USERNAME:wateradmin}
+    password: ${SPRING_DATASOURCE_PASSWORD:waterpass123}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:your-secret-key-min-32-characters-change-in-production}
+  expiration: 86400000 # 24 hours in milliseconds
+  refresh-expiration: 604800000 # 7 days
+
+# Application Configuration
+app:
+  name: WaterAccessOptimizer
+  url: ${APP_URL:http://localhost:3000}
+  invitation:
+    expiration-hours: 72 # 3 days
+
+# Logging (Structured JSON)
+logging:
+  level:
+    com.water: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: /var/log/water-optimizer/auth-service.log
+    max-size: 100MB
+    max-history: 7
+
+# Actuator & Metrics
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+      environment: ${ENVIRONMENT:dev}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true

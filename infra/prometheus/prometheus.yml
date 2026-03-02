@@ -1,0 +1,103 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'water-optimizer'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Load rules
+rule_files:
+  - 'alerts.yml'
+
+# Scrape configurations
+scrape_configs:
+  # API Gateway
+  - job_name: 'api-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['api-gateway:8080']
+        labels:
+          service: 'api-gateway'
+          team: 'platform'
+
+  # Auth Service
+  - job_name: 'auth-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['auth-service:8086']
+        labels:
+          service: 'auth-service'
+          team: 'auth'
+
+  # Water Integrator Service
+  - job_name: 'water-integrator'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['water-integrator:8081']
+        labels:
+          service: 'water-integrator'
+          team: 'data'
+
+  # Water Visualizer Service
+  - job_name: 'water-visualizer'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['water-visualizer:8082']
+        labels:
+          service: 'water-visualizer'
+          team: 'data'
+
+  # User Session Service
+  - job_name: 'user-session'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['user-session:8083']
+        labels:
+          service: 'user-session'
+          team: 'auth'
+
+  # LLM Service
+  - job_name: 'llm-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['llm-service:8084']
+        labels:
+          service: 'llm-service'
+          team: 'ai'
+
+  # Collaboration Service
+  - job_name: 'collaboration-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['collaboration-service:8085']
+        labels:
+          service: 'collaboration-service'
+          team: 'collab'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # PostgreSQL Exporter
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: 'postgres'
+          team: 'platform'
+
+  # Redis Exporter
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
+          team: 'platform'

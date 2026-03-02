@@ -1,0 +1,13 @@
+source,data_type,location_name,latitude,longitude,measurement_value,measurement_unit,measurement_date,parameter_name
+Field Survey,water_quality,Well Alpha,0.3476,32.5825,125,ppm,2024-01-10T10:30:00,TDS
+Field Survey,water_quality,Well Alpha,0.3476,32.5825,8.2,pH,2024-01-10T10:30:00,pH
+Field Survey,water_quality,Well Alpha,0.3476,32.5825,75.5,µg/L,2024-01-10T10:30:00,arsenic
+Field Survey,water_quality,Well Beta,0.3512,32.5901,89,ppm,2024-01-10T11:00:00,TDS
+Field Survey,water_quality,Well Beta,0.3512,32.5901,7.8,pH,2024-01-10T11:00:00,pH
+Field Survey,water_quality,River Site 1,0.3550,32.5950,234,ppm,2024-01-11T09:00:00,TDS
+Field Survey,water_quality,River Site 1,0.3550,32.5950,15.5,µg/L,2024-01-11T09:00:00,arsenic
+Field Survey,water_quality,River Site 1,0.3550,32.5950,12.8,NTU,2024-01-11T09:00:00,turbidity
+Field Survey,aquifer_level,Well Alpha,0.3476,32.5825,23.5,meters,2024-01-10T10:30:00,depth_to_water
+Field Survey,aquifer_level,Well Beta,0.3512,32.5901,18.2,meters,2024-01-10T11:00:00,depth_to_water
+Field Survey,water_quality,Borehole Gamma,0.3600,32.6020,2.8,mg/L,2024-01-12T14:00:00,fluoride
+Field Survey,water_quality,Borehole Gamma,0.3600,32.6020,5.2,µg/L,2024-01-12T14:00:00,arsenic

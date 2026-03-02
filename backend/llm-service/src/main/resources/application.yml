@@ -1,0 +1,61 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: llm-service
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/wateraccess}
+    username: ${SPRING_DATASOURCE_USERNAME:wateradmin}
+    password: ${SPRING_DATASOURCE_PASSWORD:waterpass123}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+# LLM Configuration
+llm:
+  api:
+    key: ${LLM_API_KEY:your-api-key}
+    url: ${LLM_API_URL:https://api.openai.com/v1}
+    model: gpt-3.5-turbo
+    timeout: 30000
+
+# MBTI Personalization Profiles
+mbti:
+  profiles:
+    ENTJ: strategic,direct,efficient
+    INTJ: analytical,thorough,systematic
+    ENTP: innovative,creative,exploratory
+    INTP: logical,detailed,theoretical
+    ENFJ: supportive,collaborative,visionary
+    INFJ: insightful,empathetic,purposeful
+    ENFP: enthusiastic,adaptable,inspiring
+    INFP: values-driven,thoughtful,idealistic
+    ESTJ: practical,organized,decisive
+    ISTJ: methodical,reliable,factual
+    ESFJ: warm,helpful,community-focused
+    ISFJ: caring,detailed,traditional
+    ESTP: action-oriented,pragmatic,energetic
+    ISTP: hands-on,objective,efficient
+    ESFP: engaging,friendly,spontaneous
+    ISFP: gentle,artistic,flexible
+
+# Logging
+logging:
+  level:
+    com.water: DEBUG
+    org.springframework: INFO
+
+# Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always

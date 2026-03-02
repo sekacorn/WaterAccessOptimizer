@@ -1,0 +1,150 @@
+# Docker Compose - Production Configuration
+# Water Access Optimizer - Full Stack Application
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: water-optimizer-db
+    environment:
+      POSTGRES_DB: wateroptimizer
+      POSTGRES_USER: wateradmin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - water-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wateradmin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Auth Service (Port 8081)
+  auth-service:
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
+    container_name: water-optimizer-auth
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/wateroptimizer
+      SPRING_DATASOURCE_USERNAME: wateradmin
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      SERVER_PORT: 8081
+    ports:
+      - "8081:8081"
+    networks:
+      - water-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # API Gateway / Data Service (Port 8087)
+  data-service:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: water-optimizer-data
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/wateroptimizer
+      SPRING_DATASOURCE_USERNAME: wateradmin
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      AUTH_SERVICE_URL: http://auth-service:8081
+      SERVER_PORT: 8087
+    ports:
+      - "8087:8087"
+    networks:
+      - water-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8087/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Frontend (React + Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: water-optimizer-frontend
+    environment:
+      VITE_API_BASE_URL: http://data-service:8087/api/v1
+      VITE_AUTH_API_URL: http://auth-service:8081/api/v1/auth
+    ports:
+      - "80:80"
+    networks:
+      - water-network
+    depends_on:
+      - auth-service
+      - data-service
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # Prometheus (Monitoring)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: water-optimizer-prometheus
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - water-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+
+  # Grafana (Dashboards)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: water-optimizer-grafana
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infra/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_SERVER_ROOT_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    networks:
+      - water-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+networks:
+  water-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  prometheus-data:
+  grafana-data:

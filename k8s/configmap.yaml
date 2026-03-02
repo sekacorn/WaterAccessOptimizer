@@ -1,0 +1,37 @@
+# ConfigMap for Application Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: water-optimizer-config
+  namespace: water-optimizer
+data:
+  # Database Configuration
+  POSTGRES_DB: "wateroptimizer"
+  POSTGRES_USER: "wateradmin"
+
+  # Spring Configuration
+  SPRING_PROFILES_ACTIVE: "prod"
+
+  # Service URLs (internal cluster DNS)
+  AUTH_SERVICE_URL: "http://auth-service:8081"
+  DATA_SERVICE_URL: "http://data-service:8087"
+
+  # API Ports
+  AUTH_SERVICE_PORT: "8081"
+  DATA_SERVICE_PORT: "8087"
+
+  # Quota Limits
+  DEFAULT_STORAGE_QUOTA_MB: "1000"
+  DEFAULT_UPLOADS_QUOTA: "100"
+  DEFAULT_ASSESSMENTS_QUOTA: "50"
+
+  # File Upload Limits (MB)
+  MAX_FILE_SIZE: "10"
+  MAX_REQUEST_SIZE: "15"
+
+  # CORS Configuration
+  ALLOWED_ORIGINS: "http://localhost:5173,https://water-optimizer.example.com"
+
+  # Database Pool
+  DB_POOL_SIZE: "10"
+  DB_POOL_TIMEOUT: "30000"

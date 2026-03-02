@@ -1,0 +1,239 @@
+# CI/CD Pipeline for Water Access Optimizer
+# Builds, tests, and deploys the application
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [master, main, develop]
+  pull_request:
+    branches: [master, main, develop]
+
+env:
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/water-optimizer
+
+jobs:
+  # Job 1: Frontend Build & Test
+  frontend:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Build application
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 1
+
+  # Job 2: Backend Build & Test
+  backend:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [auth-service, api-gateway]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Build with Maven
+        working-directory: ./backend/${{ matrix.service }}
+        run: mvn clean package -DskipTests
+
+      - name: Run unit tests
+        working-directory: ./backend/${{ matrix.service }}
+        run: mvn test
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ matrix.service }}
+          path: backend/${{ matrix.service }}/target/surefire-reports/
+          retention-days: 7
+
+  # Job 3: E2E Tests
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [frontend, backend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Install Playwright
+        working-directory: ./frontend
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        working-directory: ./frontend
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7
+
+  # Job 4: Build & Push Docker Images
+  docker:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    needs: [frontend, backend, e2e-tests]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+
+    strategy:
+      matrix:
+        component: [frontend, auth-service, data-service]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.component }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
+
+      - name: Determine build context
+        id: context
+        run: |
+          if [ "${{ matrix.component }}" == "frontend" ]; then
+            echo "path=./frontend" >> $GITHUB_OUTPUT
+          else
+            echo "path=./backend/${{ matrix.component }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ steps.context.outputs.path }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Job 5: Deploy to Kubernetes
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: docker
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+
+      - name: Update deployment images
+        run: |
+          kubectl set image deployment/frontend frontend=${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PREFIX }}-frontend:latest -n water-optimizer
+          kubectl set image deployment/auth-service auth-service=${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PREFIX }}-auth-service:latest -n water-optimizer
+          kubectl set image deployment/data-service data-service=${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PREFIX }}-data-service:latest -n water-optimizer
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/frontend -n water-optimizer --timeout=5m
+          kubectl rollout status deployment/auth-service -n water-optimizer --timeout=5m
+          kubectl rollout status deployment/data-service -n water-optimizer --timeout=5m
+
+      - name: Run smoke tests
+        run: |
+          echo "Running smoke tests..."
+          # Add your smoke test commands here
+
+  # Job 6: Security Scanning
+  security:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
