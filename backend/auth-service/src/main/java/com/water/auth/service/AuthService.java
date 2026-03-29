@@ -3,12 +3,16 @@ package com.water.auth.service;
 import com.water.auth.dto.AuthResponse;
 import com.water.auth.dto.LoginRequest;
 import com.water.auth.dto.RegisterRequest;
+import com.water.auth.dto.UserResponse;
 import com.water.auth.exception.AccountLockedException;
 import com.water.auth.exception.DuplicateEmailException;
 import com.water.auth.exception.InvalidCredentialsException;
 import com.water.auth.exception.InvalidPasswordException;
 import com.water.auth.model.User;
+import com.water.auth.repository.PasswordResetTokenRepository;
+import com.water.auth.repository.RefreshTokenRepository;
 import com.water.auth.repository.UserRepository;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Authentication service handling user registration, login, and security policies (MVP v0.1.0).
@@ -37,6 +43,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final AuditLogService auditLogService;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
     /**
@@ -74,7 +82,8 @@ public class AuthService {
         log.info("User registered successfully: {} (id={})", user.getEmail(), user.getId());
 
         // Generate JWT token
-        String token = jwtService.generateToken(user);
+        String token = jwtService.generateAccessToken(user);
+        String refreshToken = issueRefreshToken(user, httpRequest);
 
         // Log successful registration
         auditLogService.logAuthEvent(
@@ -86,7 +95,7 @@ public class AuthService {
             null
         );
 
-        return buildAuthResponse(token, user);
+        return buildAuthResponse(token, refreshToken, user);
     }
 
     /**
@@ -178,7 +187,8 @@ public class AuthService {
         log.info("Login successful: {} (id={})", user.getEmail(), user.getId());
 
         // Generate JWT token
-        String token = jwtService.generateToken(user);
+        String token = jwtService.generateAccessToken(user);
+        String refreshToken = issueRefreshToken(user, httpRequest);
 
         // Log successful login
         auditLogService.logAuthEvent(
@@ -190,7 +200,7 @@ public class AuthService {
             null
         );
 
-        return buildAuthResponse(token, user);
+        return buildAuthResponse(token, refreshToken, user);
     }
 
     /**
@@ -221,7 +231,90 @@ public class AuthService {
     /**
      * Build authentication response DTO
      */
-    private AuthResponse buildAuthResponse(String token, User user) {
+    public String refreshToken(String refreshToken) {
+        Claims claims = jwtService.parseClaims(refreshToken);
+        if (!"refresh".equals(claims.get("type", String.class))) {
+            throw new InvalidCredentialsException("Invalid refresh token");
+        }
+
+        String tokenId = claims.getId();
+        RefreshTokenRepository.RefreshTokenRecord storedToken = refreshTokenRepository.findActiveByTokenId(tokenId)
+            .orElseThrow(() -> new InvalidCredentialsException("Refresh token has expired or was revoked"));
+
+        User user = userRepository.findById(storedToken.userId())
+            .orElseThrow(() -> new InvalidCredentialsException("User not found"));
+
+        return jwtService.generateAccessToken(user);
+    }
+
+    public boolean validateToken(String token) {
+        return jwtService.validateToken(token);
+    }
+
+    public UserResponse getCurrentUser(String token) {
+        User user = getUserFromToken(token);
+        return UserResponse.builder()
+            .id(user.getId())
+            .email(user.getEmail())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .organization(user.getOrganization())
+            .role(user.getRole())
+            .storageQuotaMb(user.getStorageQuotaMb())
+            .createdAt(user.getCreatedAt())
+            .lastLogin(user.getLastLogin())
+            .build();
+    }
+
+    public void initiatePasswordReset(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            String token = UUID.randomUUID().toString();
+            passwordResetTokenRepository.save(
+                new PasswordResetTokenRepository.PasswordResetTokenRecord(
+                    token,
+                    user.getId(),
+                    Instant.now().plusSeconds(3600),
+                    false
+                )
+            );
+            log.info("Generated password reset token for user {}", user.getEmail());
+        });
+    }
+
+    public void resetPassword(String token, String newPassword) {
+        List<String> errors = validatePassword(newPassword);
+        if (!errors.isEmpty()) {
+            throw new InvalidPasswordException(String.join("; ", errors));
+        }
+
+        PasswordResetTokenRepository.PasswordResetTokenRecord record = passwordResetTokenRepository.findUsableToken(token)
+            .orElseThrow(() -> new InvalidCredentialsException("Invalid or expired reset token"));
+
+        User user = userRepository.findById(record.userId())
+            .orElseThrow(() -> new InvalidCredentialsException("User not found"));
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        passwordResetTokenRepository.markUsed(token);
+    }
+
+    public void changePassword(String token, String currentPassword, String newPassword) {
+        User user = getUserFromToken(token);
+
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new InvalidCredentialsException("Current password is incorrect");
+        }
+
+        List<String> errors = validatePassword(newPassword);
+        if (!errors.isEmpty()) {
+            throw new InvalidPasswordException(String.join("; ", errors));
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    private AuthResponse buildAuthResponse(String token, String refreshToken, User user) {
         AuthResponse.UserDto userDto = new AuthResponse.UserDto();
         userDto.setId(user.getId());
         userDto.setEmail(user.getEmail());
@@ -235,9 +328,32 @@ public class AuthService {
 
         AuthResponse response = new AuthResponse();
         response.setToken(token);
+        response.setRefreshToken(refreshToken);
         response.setUser(userDto);
 
         return response;
+    }
+
+    private User getUserFromToken(String token) {
+        Claims claims = jwtService.parseClaims(token);
+        UUID userId = UUID.fromString(claims.getSubject());
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new InvalidCredentialsException("User not found"));
+    }
+
+    private String issueRefreshToken(User user, HttpServletRequest httpRequest) {
+        String tokenId = UUID.randomUUID().toString();
+        refreshTokenRepository.save(
+            new RefreshTokenRepository.RefreshTokenRecord(
+                tokenId,
+                user.getId(),
+                Instant.now().plusSeconds(604800),
+                null,
+                getClientIp(httpRequest),
+                httpRequest.getHeader("User-Agent")
+            )
+        );
+        return jwtService.generateRefreshToken(user, tokenId);
     }
 
     /**

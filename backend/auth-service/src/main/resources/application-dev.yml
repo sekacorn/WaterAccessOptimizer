@@ -1,0 +1,4 @@
+logging:
+  level:
+    com.water: DEBUG
+    org.springframework.security: DEBUG

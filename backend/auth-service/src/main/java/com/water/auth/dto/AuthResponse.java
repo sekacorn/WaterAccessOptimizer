@@ -23,6 +23,11 @@ public class AuthResponse {
     private String token;
 
     /**
+     * JWT refresh token (7-day expiration)
+     */
+    private String refreshToken;
+
+    /**
      * User information (safe subset, no password hash)
      */
     private UserDto user;

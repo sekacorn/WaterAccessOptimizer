@@ -5,23 +5,55 @@
  */
 
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
+
+const fallbackStorage = {
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+}
+
+let notificationSequence = 0
+
+const getBrowserStorage = () => {
+  if (typeof window !== 'undefined' && window.localStorage && typeof window.localStorage.getItem === 'function') {
+    return window.localStorage
+  }
+
+  if (typeof globalThis !== 'undefined' && globalThis.localStorage && typeof globalThis.localStorage.getItem === 'function') {
+    return globalThis.localStorage
+  }
+
+  return fallbackStorage
+}
+
+export const createInitialState = () => ({
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  sidebarOpen: true,
+  mapCenter: [36.8219, -1.2921],
+  mapZoom: 10,
+  uploads: [],
+  assessments: [],
+  currentAssessment: null,
+  quotaInfo: null,
+  notifications: [],
+})
 
 const useStore = create(
   persist(
     (set, get) => ({
       // ==================== AUTH STATE ====================
-      user: null,
-      token: null,
-      isAuthenticated: false,
+      ...createInitialState(),
 
       setUser: (user) => set({ user, isAuthenticated: true }),
       setToken: (token) => {
-        localStorage.setItem('authToken', token)
+        getBrowserStorage().setItem('authToken', token)
         set({ token, isAuthenticated: true })
       },
       logout: () => {
-        localStorage.removeItem('authToken')
+        getBrowserStorage().removeItem('authToken')
         set({ user: null, token: null, isAuthenticated: false })
       },
 
@@ -63,7 +95,8 @@ const useStore = create(
       // ==================== NOTIFICATIONS ====================
       notifications: [],
       addNotification: (notification) => {
-        const id = Date.now()
+        notificationSequence += 1
+        const id = notificationSequence
         set((state) => ({
           notifications: [...state.notifications, { ...notification, id }]
         }))
@@ -75,9 +108,11 @@ const useStore = create(
       removeNotification: (id) => set((state) => ({
         notifications: state.notifications.filter(n => n.id !== id)
       })),
+      resetStore: () => set(createInitialState()),
     }),
     {
       name: 'water-optimizer-storage',
+      storage: createJSONStorage(getBrowserStorage),
       partialize: (state) => ({
         token: state.token,
         user: state.user,

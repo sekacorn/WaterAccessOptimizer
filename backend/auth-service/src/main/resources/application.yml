@@ -6,9 +6,9 @@ spring:
     name: auth-service
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/wateraccess}
-    username: ${SPRING_DATASOURCE_USERNAME:wateradmin}
-    password: ${SPRING_DATASOURCE_PASSWORD:waterpass123}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -30,7 +30,7 @@ spring:
 
 # JWT Configuration
 jwt:
-  secret: ${JWT_SECRET:your-secret-key-min-32-characters-change-in-production}
+  secret: ${JWT_SECRET}
   expiration: 86400000 # 24 hours in milliseconds
   refresh-expiration: 604800000 # 7 days
 
@@ -44,8 +44,8 @@ app:
 # Logging (Structured JSON)
 logging:
   level:
-    com.water: DEBUG
-    org.springframework.security: DEBUG
+    com.water: INFO
+    org.springframework.security: INFO
     org.springframework: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

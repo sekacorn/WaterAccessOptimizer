@@ -3,7 +3,7 @@
  * Simple email/password authentication
  */
 
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Droplet, Mail, Lock, AlertCircle, LogIn } from 'lucide-react'
 import authService from '../services/authService'
@@ -134,7 +134,7 @@ function Login() {
 
         <div className="auth-footer">
           <p>
-            Don't have an account? <Link to="/register">Sign up</Link>
+            Don&apos;t have an account? <Link to="/register">Sign up</Link>
           </p>
         </div>
       </div>

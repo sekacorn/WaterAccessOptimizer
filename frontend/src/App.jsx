@@ -6,7 +6,7 @@
  * With lazy loading for optimal performance.
  */
 
-import React, { Suspense, lazy } from 'react'
+import { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import { Droplet, LogOut, User as UserIcon, Upload, Map, BarChart3, FileDown } from 'lucide-react'
 

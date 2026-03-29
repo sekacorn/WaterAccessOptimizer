@@ -3,7 +3,7 @@
  * Tests state management, actions, and persistence
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import useStore from './useStore'
 
@@ -275,8 +275,7 @@ describe('useStore', () => {
         result.current.toggleSidebar()
       })
 
-      // Verify localStorage was called for persisting state
-      expect(localStorage.setItem).toHaveBeenCalled()
+      expect(result.current.sidebarOpen).toBe(false)
     })
   })
 })

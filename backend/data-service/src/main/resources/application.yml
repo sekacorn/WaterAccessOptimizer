@@ -6,9 +6,9 @@ spring:
     name: data-service
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/wateraccess}
-    username: ${SPRING_DATASOURCE_USERNAME:wateradmin}
-    password: ${SPRING_DATASOURCE_PASSWORD:waterpass123}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -42,7 +42,7 @@ spring:
 
 # JWT Configuration (for validation only)
 jwt:
-  secret: ${JWT_SECRET:your-secret-key-min-32-characters-change-in-production}
+  secret: ${JWT_SECRET}
 
 # Application Configuration
 app:
@@ -65,7 +65,7 @@ app:
 # Logging (Structured JSON)
 logging:
   level:
-    com.water: DEBUG
+    com.water: INFO
     org.springframework.security: INFO
     org.springframework: INFO
     org.hibernate.SQL: DEBUG
@@ -106,10 +106,10 @@ management:
 # SpringDoc OpenAPI Configuration
 springdoc:
   api-docs:
-    enabled: true
+    enabled: false
     path: /api-docs
   swagger-ui:
-    enabled: true
+    enabled: false
     path: /swagger-ui.html
     operationsSorter: method
     tagsSorter: alpha

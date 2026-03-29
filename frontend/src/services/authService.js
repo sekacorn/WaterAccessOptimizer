@@ -12,86 +12,71 @@ class AuthService {
    * Register a new user
    */
   async register(email, password, fullName, organization = null) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, fullName, organization })
-      })
+    const response = await fetch(`${API_BASE_URL}/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password, fullName, organization })
+    })
 
-      const data = await response.json()
+    const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed')
-      }
-
-      // Store token and user data
-      if (data.token) {
-        this.setAuth(data.token, data)
-      }
-
-      return data
-    } catch (error) {
-      throw error
+    if (!response.ok) {
+      throw new Error(data.message || 'Registration failed')
     }
+
+    if (data.token) {
+      this.setAuth(data.token, data)
+    }
+
+    return data
   }
 
   /**
    * Login user
    */
   async login(email, password) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password })
-      })
+    const response = await fetch(`${API_BASE_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password })
+    })
 
-      const data = await response.json()
+    const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed')
-      }
-
-      // Store token and user data
-      this.setAuth(data.token, data)
-
-      return data
-    } catch (error) {
-      throw error
+    if (!response.ok) {
+      throw new Error(data.message || 'Login failed')
     }
+
+    this.setAuth(data.token, data)
+
+    return data
   }
 
   /**
    * Verify MFA code
    */
   async verifyMfa(tempToken, code, trustDevice = false) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/mfa/verify`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ tempToken, code, trustDevice })
-      })
+    const response = await fetch(`${API_BASE_URL}/mfa/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ tempToken, code, trustDevice })
+    })
 
-      const data = await response.json()
+    const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.error || 'MFA verification failed')
-      }
-
-      // Store token and user data
-      this.setAuth(data.token, data.user)
-
-      return data
-    } catch (error) {
-      throw error
+    if (!response.ok) {
+      throw new Error(data.error || 'MFA verification failed')
     }
+
+    this.setAuth(data.token, data.user)
+
+    return data
   }
 
   /**
@@ -115,18 +100,13 @@ class AuthService {
    * Initiate SSO login
    */
   async initiateSsoLogin(provider, email) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/sso/login/${provider}?email=${encodeURIComponent(email)}`)
+    const response = await fetch(`${API_BASE_URL}/sso/login/${provider}?email=${encodeURIComponent(email)}`)
 
-      if (!response.ok) {
-        throw new Error('SSO login failed')
-      }
-
-      const data = await response.json()
-      return data
-    } catch (error) {
-      throw error
+    if (!response.ok) {
+      throw new Error('SSO login failed')
     }
+
+    return response.json()
   }
 
   /**
@@ -145,7 +125,7 @@ class AuthService {
     if (userStr) {
       try {
         return JSON.parse(userStr)
-      } catch (error) {
+      } catch {
         return null
       }
     }
@@ -171,7 +151,9 @@ class AuthService {
    */
   hasRole(role) {
     const user = this.getCurrentUser()
-    if (!user) return false
+    if (!user) {
+      return false
+    }
 
     if (Array.isArray(role)) {
       return role.includes(user.role)
@@ -222,81 +204,69 @@ class AuthService {
    * Change password
    */
   async changePassword(currentPassword, newPassword) {
-    try {
-      const token = this.getToken()
-      if (!token) {
-        throw new Error('Not authenticated')
-      }
-
-      const response = await fetch(`${API_BASE_URL}/change-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ currentPassword, newPassword })
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Password change failed')
-      }
-
-      return data
-    } catch (error) {
-      throw error
+    const token = this.getToken()
+    if (!token) {
+      throw new Error('Not authenticated')
     }
+
+    const response = await fetch(`${API_BASE_URL}/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ currentPassword, newPassword })
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Password change failed')
+    }
+
+    return data
   }
 
   /**
    * Request password reset
    */
   async requestPasswordReset(email) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/forgot-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email })
-      })
+    const response = await fetch(`${API_BASE_URL}/forgot-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email })
+    })
 
-      const data = await response.json()
+    const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Password reset request failed')
-      }
-
-      return data
-    } catch (error) {
-      throw error
+    if (!response.ok) {
+      throw new Error(data.error || 'Password reset request failed')
     }
+
+    return data
   }
 
   /**
    * Reset password with token
    */
   async resetPassword(token, newPassword) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/reset-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token, newPassword })
-      })
+    const response = await fetch(`${API_BASE_URL}/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token, newPassword })
+    })
 
-      const data = await response.json()
+    const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Password reset failed')
-      }
-
-      return data
-    } catch (error) {
-      throw error
+    if (!response.ok) {
+      throw new Error(data.error || 'Password reset failed')
     }
+
+    return data
   }
 }
 

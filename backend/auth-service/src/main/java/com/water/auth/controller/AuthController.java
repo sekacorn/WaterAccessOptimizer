@@ -26,7 +26,6 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class AuthController {
 
     private final AuthService authService;
@@ -47,10 +46,13 @@ public class AuthController {
         try {
             // AuthService handles audit logging internally
             AuthResponse response = authService.register(request, httpRequest);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             log.error("Registration failed: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            HttpStatus status = e.getMessage() != null && e.getMessage().contains("already")
+                ? HttpStatus.CONFLICT
+                : HttpStatus.BAD_REQUEST;
+            return ResponseEntity.status(status)
                     .body(Map.of("error", e.getMessage()));
         }
     }

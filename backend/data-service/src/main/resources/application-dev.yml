@@ -1,0 +1,9 @@
+logging:
+  level:
+    com.water: DEBUG
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

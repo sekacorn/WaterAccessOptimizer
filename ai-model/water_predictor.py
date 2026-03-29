@@ -16,6 +16,7 @@ import torch.nn as nn
 import numpy as np
 import uvicorn
 import logging
+import os
 from datetime import datetime
 
 # Configure logging
@@ -30,9 +31,15 @@ app = FastAPI(
 )
 
 # Add CORS middleware for cross-origin requests
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify exact origins
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

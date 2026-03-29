@@ -35,11 +35,19 @@ describe('Dashboard', () => {
   })
 
   it('should render dashboard heading', () => {
+    api.getUploads.mockImplementation(() => new Promise(() => {}))
+    api.getAssessments.mockImplementation(() => new Promise(() => {}))
+    api.getQuotaInfo.mockImplementation(() => new Promise(() => {}))
+
     renderWithRouter(<Dashboard />)
     expect(screen.getByText(/Dashboard/i)).toBeInTheDocument()
   })
 
   it('should show loading state initially', () => {
+    api.getUploads.mockImplementation(() => new Promise(() => {}))
+    api.getAssessments.mockImplementation(() => new Promise(() => {}))
+    api.getQuotaInfo.mockImplementation(() => new Promise(() => {}))
+
     renderWithRouter(<Dashboard />)
     expect(screen.getByText(/Loading dashboard/i)).toBeInTheDocument()
   })

@@ -3,14 +3,14 @@
  * Overview of uploads, assessments, and key metrics
  */
 
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Upload, Map, BarChart3, FileDown, TrendingUp, Database } from 'lucide-react'
 import { getUploads, getAssessments, getQuotaInfo } from '../services/api'
 import useStore from '../store/useStore'
 
 function Dashboard() {
-  const { quotaInfo, setQuotaInfo } = useStore()
+  const { quotaInfo, setQuotaInfo, addNotification } = useStore()
   const [recentUploads, setRecentUploads] = useState([])
   const [recentAssessments, setRecentAssessments] = useState([])
   const [loading, setLoading] = useState(true)
@@ -29,13 +29,14 @@ function Dashboard() {
         setQuotaInfo(quota)
       } catch (error) {
         console.error('Failed to load dashboard data:', error)
+        addNotification({ type: 'error', message: 'Failed to load dashboard data' })
       } finally {
         setLoading(false)
       }
     }
 
     loadDashboardData()
-  }, [setQuotaInfo])
+  }, [addNotification, setQuotaInfo])
 
   if (loading) {
     return <div className="loading">Loading dashboard...</div>

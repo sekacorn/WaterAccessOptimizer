@@ -3,7 +3,7 @@
  * CSV file upload with validation feedback and history
  */
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Upload, FileText, AlertCircle, CheckCircle, Trash2, XCircle } from 'lucide-react'
 import { uploadHydroData, uploadCommunityData, uploadInfrastructureData, getUploads, deleteUpload } from '../services/api'
 import useStore from '../store/useStore'
@@ -16,18 +16,18 @@ function DataUpload() {
   const [uploadResult, setUploadResult] = useState(null)
   const [dragActive, setDragActive] = useState(false)
 
-  useEffect(() => {
-    loadUploads()
-  }, [])
-
-  const loadUploads = async () => {
+  const loadUploads = useCallback(async () => {
     try {
       const response = await getUploads(0, 20)
       setUploads(response.uploads || [])
     } catch (error) {
       console.error('Failed to load uploads:', error)
     }
-  }
+  }, [setUploads])
+
+  useEffect(() => {
+    loadUploads()
+  }, [loadUploads])
 
   const handleFileChange = (e) => {
     const file = e.target.files[0]
@@ -100,7 +100,10 @@ function DataUpload() {
   }
 
   const handleDelete = async (uploadId) => {
-    if (!window.confirm('Are you sure you want to delete this upload?')) return
+    // eslint-disable-next-line no-alert
+    if (!window.confirm('Are you sure you want to delete this upload?')) {
+      return
+    }
 
     try {
       await deleteUpload(uploadId)
@@ -200,8 +203,8 @@ function DataUpload() {
               <div className="validation-issues">
                 <h3>Errors</h3>
                 <ul>
-                  {uploadResult.errors.slice(0, 10).map((error, idx) => (
-                    <li key={idx} className="error">
+                  {uploadResult.errors.slice(0, 10).map((error) => (
+                    <li key={`${error.row || 'row'}-${error.message}`} className="error">
                       {error.row && `Row ${error.row}: `}{error.message}
                     </li>
                   ))}
@@ -216,8 +219,8 @@ function DataUpload() {
               <div className="validation-issues">
                 <h3>Warnings</h3>
                 <ul>
-                  {uploadResult.warnings.slice(0, 5).map((warning, idx) => (
-                    <li key={idx} className="warning">
+                  {uploadResult.warnings.slice(0, 5).map((warning) => (
+                    <li key={`${warning.row || 'row'}-${warning.message}`} className="warning">
                       {warning.row && `Row ${warning.row}: `}{warning.message}
                     </li>
                   ))}

@@ -1,13 +1,16 @@
 /**
  * API Service for WaterAccessOptimizer
  *
- * Handles all HTTP requests to the backend API Gateway.
+ * Handles all HTTP requests to the active backend APIs.
  * Uses axios for HTTP client with interceptors for error handling.
  */
 
 import axios from 'axios'
+import * as mockApi from './mockApi'
 
-// Get API base URL from environment or use default
+const USE_MOCK_API = import.meta.env.VITE_ENABLE_MOCK_API === 'true'
+
+// Get data API base URL from environment or use default
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8087/api/v1'
 
 // Create axios instance with default configuration
@@ -64,6 +67,9 @@ apiClient.interceptors.response.use(
  * Upload hydrological data (CSV)
  */
 export const uploadHydroData = async (file) => {
+  if (USE_MOCK_API) {
+    return mockApi.uploadHydroData(file)
+  }
   const formData = new FormData()
   formData.append('file', file)
 
@@ -79,6 +85,9 @@ export const uploadHydroData = async (file) => {
  * Upload community data (CSV)
  */
 export const uploadCommunityData = async (file) => {
+  if (USE_MOCK_API) {
+    return mockApi.uploadCommunityData(file)
+  }
   const formData = new FormData()
   formData.append('file', file)
 
@@ -94,6 +103,9 @@ export const uploadCommunityData = async (file) => {
  * Upload infrastructure data (CSV)
  */
 export const uploadInfrastructureData = async (file) => {
+  if (USE_MOCK_API) {
+    return mockApi.uploadInfrastructureData(file)
+  }
   const formData = new FormData()
   formData.append('file', file)
 
@@ -109,8 +121,13 @@ export const uploadInfrastructureData = async (file) => {
  * Get user's upload history
  */
 export const getUploads = async (page = 0, pageSize = 20, dataType = null) => {
+  if (USE_MOCK_API) {
+    return mockApi.getUploads(page, pageSize, dataType)
+  }
   const params = { page, pageSize }
-  if (dataType) params.dataType = dataType
+  if (dataType) {
+    params.dataType = dataType
+  }
   const response = await apiClient.get('/data/uploads', { params })
   return response.data
 }
@@ -119,6 +136,9 @@ export const getUploads = async (page = 0, pageSize = 20, dataType = null) => {
  * Delete an upload
  */
 export const deleteUpload = async (uploadId) => {
+  if (USE_MOCK_API) {
+    return mockApi.deleteUpload(uploadId)
+  }
   const response = await apiClient.delete(`/data/uploads/${uploadId}`)
   return response.data
 }
@@ -127,6 +147,9 @@ export const deleteUpload = async (uploadId) => {
  * Get storage quota information
  */
 export const getQuotaInfo = async () => {
+  if (USE_MOCK_API) {
+    return mockApi.getQuotaInfo()
+  }
   const response = await apiClient.get('/data/quota')
   return response.data
 }
@@ -137,6 +160,9 @@ export const getQuotaInfo = async () => {
  * Create a new risk assessment
  */
 export const createAssessment = async (name, description, isPublic = false) => {
+  if (USE_MOCK_API) {
+    return mockApi.createAssessment(name, description, isPublic)
+  }
   const response = await apiClient.post('/risk/assessments', {
     name,
     description,
@@ -149,6 +175,9 @@ export const createAssessment = async (name, description, isPublic = false) => {
  * Get user's risk assessments
  */
 export const getAssessments = async () => {
+  if (USE_MOCK_API) {
+    return mockApi.getAssessments()
+  }
   const response = await apiClient.get('/risk/assessments')
   return response.data
 }
@@ -157,6 +186,9 @@ export const getAssessments = async () => {
  * Get public risk assessments
  */
 export const getPublicAssessments = async () => {
+  if (USE_MOCK_API) {
+    return mockApi.getPublicAssessments()
+  }
   const response = await apiClient.get('/risk/assessments/public')
   return response.data
 }
@@ -165,6 +197,9 @@ export const getPublicAssessments = async () => {
  * Get assessment details
  */
 export const getAssessment = async (assessmentId) => {
+  if (USE_MOCK_API) {
+    return mockApi.getAssessment(assessmentId)
+  }
   const response = await apiClient.get(`/risk/assessments/${assessmentId}`)
   return response.data
 }
@@ -173,6 +208,9 @@ export const getAssessment = async (assessmentId) => {
  * Get assessment results
  */
 export const getAssessmentResults = async (assessmentId, riskLevel = null) => {
+  if (USE_MOCK_API) {
+    return mockApi.getAssessmentResults(assessmentId, riskLevel)
+  }
   const params = riskLevel ? { riskLevel } : {}
   const response = await apiClient.get(`/risk/assessments/${assessmentId}/results`, { params })
   return response.data
@@ -182,6 +220,9 @@ export const getAssessmentResults = async (assessmentId, riskLevel = null) => {
  * Get assessment summary statistics
  */
 export const getAssessmentSummary = async (assessmentId) => {
+  if (USE_MOCK_API) {
+    return mockApi.getAssessmentSummary(assessmentId)
+  }
   const response = await apiClient.get(`/risk/assessments/${assessmentId}/summary`)
   return response.data
 }
@@ -190,7 +231,18 @@ export const getAssessmentSummary = async (assessmentId) => {
  * Delete an assessment
  */
 export const deleteAssessment = async (assessmentId) => {
+  if (USE_MOCK_API) {
+    return mockApi.deleteAssessment(assessmentId)
+  }
   const response = await apiClient.delete(`/risk/assessments/${assessmentId}`)
+  return response.data
+}
+
+export const runAssessment = async (assessmentId) => {
+  if (USE_MOCK_API) {
+    return mockApi.runAssessment(assessmentId)
+  }
+  const response = await apiClient.post(`/risk/assessments/${assessmentId}/run`)
   return response.data
 }
 
@@ -200,6 +252,9 @@ export const deleteAssessment = async (assessmentId) => {
  * Get communities near a location
  */
 export const getCommunitiesNearby = async (longitude, latitude, radiusKm = 10) => {
+  if (USE_MOCK_API) {
+    return mockApi.getCommunitiesNearby(longitude, latitude, radiusKm)
+  }
   const params = { longitude, latitude, radiusKm }
   const response = await apiClient.get('/map/communities/nearby', { params })
   return response.data
@@ -209,6 +264,9 @@ export const getCommunitiesNearby = async (longitude, latitude, radiusKm = 10) =
  * Get facilities near a location
  */
 export const getFacilitiesNearby = async (longitude, latitude, radiusKm = 10) => {
+  if (USE_MOCK_API) {
+    return mockApi.getFacilitiesNearby(longitude, latitude, radiusKm)
+  }
   const params = { longitude, latitude, radiusKm }
   const response = await apiClient.get('/map/facilities/nearby', { params })
   return response.data
@@ -218,6 +276,9 @@ export const getFacilitiesNearby = async (longitude, latitude, radiusKm = 10) =>
  * Get water quality measurements near a location
  */
 export const getMeasurementsNearby = async (longitude, latitude, radiusKm = 10) => {
+  if (USE_MOCK_API) {
+    return mockApi.getMeasurementsNearby(longitude, latitude, radiusKm)
+  }
   const params = { longitude, latitude, radiusKm }
   const response = await apiClient.get('/map/measurements/nearby', { params })
   return response.data
@@ -227,6 +288,9 @@ export const getMeasurementsNearby = async (longitude, latitude, radiusKm = 10) 
  * Get all communities (GeoJSON)
  */
 export const getAllCommunities = async () => {
+  if (USE_MOCK_API) {
+    return mockApi.getAllCommunities()
+  }
   const response = await apiClient.get('/map/communities')
   return response.data
 }
@@ -235,6 +299,9 @@ export const getAllCommunities = async () => {
  * Get all facilities (GeoJSON)
  */
 export const getAllFacilities = async () => {
+  if (USE_MOCK_API) {
+    return mockApi.getAllFacilities()
+  }
   const response = await apiClient.get('/map/facilities')
   return response.data
 }
@@ -245,6 +312,9 @@ export const getAllFacilities = async () => {
  * Export assessment to Excel
  */
 export const exportToExcel = async (assessmentId, riskLevel = null) => {
+  if (USE_MOCK_API) {
+    return mockApi.exportToExcel(assessmentId, riskLevel)
+  }
   const params = riskLevel ? { riskLevel } : {}
   const response = await apiClient.get(`/export/assessments/${assessmentId}/excel`, {
     params,
@@ -257,6 +327,9 @@ export const exportToExcel = async (assessmentId, riskLevel = null) => {
  * Export assessment to PDF
  */
 export const exportToPDF = async (assessmentId, riskLevel = null) => {
+  if (USE_MOCK_API) {
+    return mockApi.exportToPDF(assessmentId, riskLevel)
+  }
   const params = riskLevel ? { riskLevel } : {}
   const response = await apiClient.get(`/export/assessments/${assessmentId}/pdf`, {
     params,
@@ -271,6 +344,9 @@ export const exportToPDF = async (assessmentId, riskLevel = null) => {
  * Check data service health
  */
 export const checkHealth = async () => {
+  if (USE_MOCK_API) {
+    return mockApi.checkHealth()
+  }
   const response = await apiClient.get('/data/health')
   return response.data
 }

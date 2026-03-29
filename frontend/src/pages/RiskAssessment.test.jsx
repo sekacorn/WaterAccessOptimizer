@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { screen, waitFor, fireEvent } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithRouter, mockApiResponses } from '../test/testUtils'
 import RiskAssessment from './RiskAssessment'
@@ -40,11 +40,15 @@ describe('RiskAssessment', () => {
 
   describe('Rendering', () => {
     it('should render page heading', async () => {
+      api.getAssessments.mockImplementation(() => new Promise(() => {}))
+
       renderWithRouter(<RiskAssessment />)
       expect(screen.getByText(/Risk Assessment/i)).toBeInTheDocument()
     })
 
     it('should show loading state initially', () => {
+      api.getAssessments.mockImplementation(() => new Promise(() => {}))
+
       renderWithRouter(<RiskAssessment />)
       expect(screen.getByText(/Loading assessments/i)).toBeInTheDocument()
     })

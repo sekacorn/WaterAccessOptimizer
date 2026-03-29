@@ -3,9 +3,9 @@
  * View risk assessment results with charts and data tables
  */
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { BarChart3, Download, FileSpreadsheet, FileText, Filter, ArrowLeft } from 'lucide-react'
+import { BarChart3, FileSpreadsheet, FileText, Filter, ArrowLeft } from 'lucide-react'
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
 import { Pie, Bar } from 'react-chartjs-2'
 import { getAssessmentResults, exportToExcel, exportToPDF } from '../services/api'
@@ -17,17 +17,13 @@ ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tool
 function AssessmentResults() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { addNotification, setCurrentAssessment, currentAssessment } = useStore()
+  const { addNotification, setCurrentAssessment } = useStore()
   const [loading, setLoading] = useState(true)
   const [results, setResults] = useState(null)
   const [riskFilter, setRiskFilter] = useState('ALL')
   const [exporting, setExporting] = useState(false)
 
-  useEffect(() => {
-    loadResults()
-  }, [id])
-
-  const loadResults = async () => {
+  const loadResults = useCallback(async () => {
     try {
       const data = await getAssessmentResults(id)
       setResults(data)
@@ -38,7 +34,11 @@ function AssessmentResults() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [addNotification, id, setCurrentAssessment])
+
+  useEffect(() => {
+    loadResults()
+  }, [loadResults])
 
   const handleExportExcel = async () => {
     setExporting(true)
@@ -94,8 +94,12 @@ function AssessmentResults() {
   }
 
   const getFilteredRecords = () => {
-    if (!results || !results.records) return []
-    if (riskFilter === 'ALL') return results.records
+    if (!results || !results.records) {
+      return []
+    }
+    if (riskFilter === 'ALL') {
+      return results.records
+    }
     return results.records.filter(record => record.riskLevel === riskFilter)
   }
 
@@ -305,8 +309,8 @@ function AssessmentResults() {
                   </tr>
                 </thead>
                 <tbody>
-                  {records.map((record, idx) => (
-                    <tr key={idx}>
+                  {records.map((record) => (
+                    <tr key={record.locationName || record.communityName || `${record.region}-${record.riskLevel}`}>
                       <td>
                         <strong>{record.locationName || record.communityName || 'N/A'}</strong>
                         {record.region && <div className="text-small">{record.region}</div>}

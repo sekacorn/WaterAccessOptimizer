@@ -3,8 +3,34 @@
  * Tests API calls, interceptors, and error handling
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import axios from 'axios'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+
+const { mockClient, mockAxios } = vi.hoisted(() => {
+  const client = {
+    get: vi.fn(),
+    post: vi.fn(),
+    delete: vi.fn(),
+    interceptors: {
+      request: { use: vi.fn() },
+      response: { use: vi.fn() },
+    },
+  }
+
+  return {
+    mockClient: client,
+    mockAxios: {
+      create: vi.fn(() => client),
+      get: vi.fn(),
+      post: vi.fn(),
+      delete: vi.fn(),
+    },
+  }
+})
+
+vi.mock('axios', () => ({
+  default: mockAxios,
+}))
+
 import {
   uploadHydroData,
   uploadCommunityData,
@@ -20,15 +46,11 @@ import {
   getAllFacilities,
   exportToExcel,
   exportToPDF,
-  getQuotaInfo
+  getQuotaInfo,
 } from './api'
-
-// Mock axios
-vi.mock('axios')
 
 describe('API Service', () => {
   beforeEach(() => {
-    // Reset mocks before each test
     vi.clearAllMocks()
     localStorage.clear()
   })
@@ -38,16 +60,16 @@ describe('API Service', () => {
       const mockFile = new File(['test'], 'test.csv', { type: 'text/csv' })
       const mockResponse = { status: 'SUCCESS', rowsProcessed: 100 }
 
-      axios.post.mockResolvedValue({ data: mockResponse })
+      mockClient.post.mockResolvedValue({ data: mockResponse })
 
       const result = await uploadHydroData(mockFile)
 
-      expect(axios.post).toHaveBeenCalledWith(
+      expect(mockClient.post).toHaveBeenCalledWith(
         expect.stringContaining('/data/upload/hydro'),
         expect.any(FormData),
         expect.objectContaining({
-          headers: { 'Content-Type': 'multipart/form-data' }
-        })
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }),
       )
       expect(result).toEqual(mockResponse)
     })
@@ -56,14 +78,14 @@ describe('API Service', () => {
       const mockFile = new File(['test'], 'community.csv', { type: 'text/csv' })
       const mockResponse = { status: 'SUCCESS', rowsProcessed: 50 }
 
-      axios.post.mockResolvedValue({ data: mockResponse })
+      mockClient.post.mockResolvedValue({ data: mockResponse })
 
       const result = await uploadCommunityData(mockFile)
 
-      expect(axios.post).toHaveBeenCalledWith(
+      expect(mockClient.post).toHaveBeenCalledWith(
         expect.stringContaining('/data/upload/community'),
         expect.any(FormData),
-        expect.any(Object)
+        expect.any(Object),
       )
       expect(result).toEqual(mockResponse)
     })
@@ -72,7 +94,7 @@ describe('API Service', () => {
       const mockFile = new File(['test'], 'infrastructure.csv', { type: 'text/csv' })
       const mockResponse = { status: 'WARNING', rowsProcessed: 30, warningCount: 5 }
 
-      axios.post.mockResolvedValue({ data: mockResponse })
+      mockClient.post.mockResolvedValue({ data: mockResponse })
 
       const result = await uploadInfrastructureData(mockFile)
 
@@ -84,31 +106,31 @@ describe('API Service', () => {
       const mockResponse = {
         uploads: [
           { id: 1, filename: 'test1.csv' },
-          { id: 2, filename: 'test2.csv' }
+          { id: 2, filename: 'test2.csv' },
         ],
-        totalPages: 1
+        totalPages: 1,
       }
 
-      axios.get.mockResolvedValue({ data: mockResponse })
+      mockClient.get.mockResolvedValue({ data: mockResponse })
 
       const result = await getUploads(0, 20)
 
-      expect(axios.get).toHaveBeenCalledWith(
+      expect(mockClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/data/uploads'),
         expect.objectContaining({
-          params: { page: 0, size: 20 }
-        })
+          params: { page: 0, pageSize: 20 },
+        }),
       )
       expect(result.uploads.length).toBe(2)
     })
 
     it('should delete upload', async () => {
-      axios.delete.mockResolvedValue({ data: { message: 'Deleted' } })
+      mockClient.delete.mockResolvedValue({ data: { message: 'Deleted' } })
 
       await deleteUpload(123)
 
-      expect(axios.delete).toHaveBeenCalledWith(
-        expect.stringContaining('/data/uploads/123')
+      expect(mockClient.delete).toHaveBeenCalledWith(
+        expect.stringContaining('/data/uploads/123'),
       )
     })
   })
@@ -119,20 +141,20 @@ describe('API Service', () => {
         id: 1,
         name: 'Test Assessment',
         description: 'Test description',
-        isPublic: false
+        isPublic: false,
       }
 
-      axios.post.mockResolvedValue({ data: mockAssessment })
+      mockClient.post.mockResolvedValue({ data: mockAssessment })
 
       const result = await createAssessment('Test Assessment', 'Test description', false)
 
-      expect(axios.post).toHaveBeenCalledWith(
+      expect(mockClient.post).toHaveBeenCalledWith(
         expect.stringContaining('/risk/assessments'),
         {
           name: 'Test Assessment',
           description: 'Test description',
-          isPublic: false
-        }
+          isPublic: false,
+        },
       )
       expect(result).toEqual(mockAssessment)
     })
@@ -140,15 +162,15 @@ describe('API Service', () => {
     it('should get assessments', async () => {
       const mockAssessments = [
         { id: 1, name: 'Assessment 1', status: 'COMPLETED' },
-        { id: 2, name: 'Assessment 2', status: 'PENDING' }
+        { id: 2, name: 'Assessment 2', status: 'PENDING' },
       ]
 
-      axios.get.mockResolvedValue({ data: mockAssessments })
+      mockClient.get.mockResolvedValue({ data: mockAssessments })
 
       const result = await getAssessments()
 
-      expect(axios.get).toHaveBeenCalledWith(
-        expect.stringContaining('/risk/assessments')
+      expect(mockClient.get).toHaveBeenCalledWith(
+        expect.stringContaining('/risk/assessments'),
       )
       expect(result.length).toBe(2)
     })
@@ -157,15 +179,15 @@ describe('API Service', () => {
       const mockResult = {
         id: 1,
         status: 'COMPLETED',
-        summary: { totalRecords: 100, highRiskCount: 20 }
+        summary: { totalRecords: 100, highRiskCount: 20 },
       }
 
-      axios.post.mockResolvedValue({ data: mockResult })
+      mockClient.post.mockResolvedValue({ data: mockResult })
 
       const result = await runAssessment(1)
 
-      expect(axios.post).toHaveBeenCalledWith(
-        expect.stringContaining('/risk/assessments/1/run')
+      expect(mockClient.post).toHaveBeenCalledWith(
+        expect.stringContaining('/risk/assessments/1/run'),
       )
       expect(result.summary.totalRecords).toBe(100)
     })
@@ -175,26 +197,29 @@ describe('API Service', () => {
         id: 1,
         name: 'Test Assessment',
         summary: { totalRecords: 100 },
-        records: []
+        records: [],
       }
 
-      axios.get.mockResolvedValue({ data: mockResults })
+      mockClient.get.mockResolvedValue({ data: mockResults })
 
       const result = await getAssessmentResults(1)
 
-      expect(axios.get).toHaveBeenCalledWith(
-        expect.stringContaining('/risk/assessments/1/results')
+      expect(mockClient.get).toHaveBeenCalledWith(
+        expect.stringContaining('/risk/assessments/1/results'),
+        expect.objectContaining({
+          params: {},
+        }),
       )
       expect(result.summary.totalRecords).toBe(100)
     })
 
     it('should delete assessment', async () => {
-      axios.delete.mockResolvedValue({ data: { message: 'Deleted' } })
+      mockClient.delete.mockResolvedValue({ data: { message: 'Deleted' } })
 
       await deleteAssessment(1)
 
-      expect(axios.delete).toHaveBeenCalledWith(
-        expect.stringContaining('/risk/assessments/1')
+      expect(mockClient.delete).toHaveBeenCalledWith(
+        expect.stringContaining('/risk/assessments/1'),
       )
     })
   })
@@ -207,17 +232,17 @@ describe('API Service', () => {
           {
             type: 'Feature',
             geometry: { type: 'Point', coordinates: [-1.2921, 36.8219] },
-            properties: { communityName: 'Test Community' }
-          }
-        ]
+            properties: { communityName: 'Test Community' },
+          },
+        ],
       }
 
-      axios.get.mockResolvedValue({ data: mockGeoJSON })
+      mockClient.get.mockResolvedValue({ data: mockGeoJSON })
 
       const result = await getAllCommunities()
 
-      expect(axios.get).toHaveBeenCalledWith(
-        expect.stringContaining('/map/communities')
+      expect(mockClient.get).toHaveBeenCalledWith(
+        expect.stringContaining('/map/communities'),
       )
       expect(result.type).toBe('FeatureCollection')
       expect(result.features.length).toBe(1)
@@ -226,15 +251,15 @@ describe('API Service', () => {
     it('should get all facilities as GeoJSON', async () => {
       const mockGeoJSON = {
         type: 'FeatureCollection',
-        features: []
+        features: [],
       }
 
-      axios.get.mockResolvedValue({ data: mockGeoJSON })
+      mockClient.get.mockResolvedValue({ data: mockGeoJSON })
 
       const result = await getAllFacilities()
 
-      expect(axios.get).toHaveBeenCalledWith(
-        expect.stringContaining('/map/facilities')
+      expect(mockClient.get).toHaveBeenCalledWith(
+        expect.stringContaining('/map/facilities'),
       )
       expect(result.type).toBe('FeatureCollection')
     })
@@ -243,47 +268,47 @@ describe('API Service', () => {
   describe('Export APIs', () => {
     it('should export to Excel with blob response', async () => {
       const mockBlob = new Blob(['test'], { type: 'application/vnd.ms-excel' })
-      axios.get.mockResolvedValue({ data: mockBlob })
+      mockClient.get.mockResolvedValue({ data: mockBlob })
 
       const result = await exportToExcel(1, 'HIGH')
 
-      expect(axios.get).toHaveBeenCalledWith(
+      expect(mockClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/export/assessments/1/excel'),
         expect.objectContaining({
           params: { riskLevel: 'HIGH' },
-          responseType: 'blob'
-        })
+          responseType: 'blob',
+        }),
       )
       expect(result).toBeInstanceOf(Blob)
     })
 
     it('should export to Excel without risk filter', async () => {
       const mockBlob = new Blob(['test'], { type: 'application/vnd.ms-excel' })
-      axios.get.mockResolvedValue({ data: mockBlob })
+      mockClient.get.mockResolvedValue({ data: mockBlob })
 
       await exportToExcel(1, null)
 
-      expect(axios.get).toHaveBeenCalledWith(
+      expect(mockClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/export/assessments/1/excel'),
         expect.objectContaining({
           params: {},
-          responseType: 'blob'
-        })
+          responseType: 'blob',
+        }),
       )
     })
 
     it('should export to PDF with blob response', async () => {
       const mockBlob = new Blob(['test'], { type: 'application/pdf' })
-      axios.get.mockResolvedValue({ data: mockBlob })
+      mockClient.get.mockResolvedValue({ data: mockBlob })
 
       const result = await exportToPDF(1, 'MEDIUM')
 
-      expect(axios.get).toHaveBeenCalledWith(
+      expect(mockClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/export/assessments/1/pdf'),
         expect.objectContaining({
           params: { riskLevel: 'MEDIUM' },
-          responseType: 'blob'
-        })
+          responseType: 'blob',
+        }),
       )
       expect(result).toBeInstanceOf(Blob)
     })
@@ -297,15 +322,15 @@ describe('API Service', () => {
         uploadsUsed: 10,
         uploadsQuota: 100,
         assessmentsUsed: 5,
-        assessmentsQuota: 50
+        assessmentsQuota: 50,
       }
 
-      axios.get.mockResolvedValue({ data: mockQuota })
+      mockClient.get.mockResolvedValue({ data: mockQuota })
 
       const result = await getQuotaInfo()
 
-      expect(axios.get).toHaveBeenCalledWith(
-        expect.stringContaining('/user/quota')
+      expect(mockClient.get).toHaveBeenCalledWith(
+        expect.stringContaining('/data/quota'),
       )
       expect(result.storageUsedMb).toBe(50)
       expect(result.uploadsUsed).toBe(10)
@@ -315,7 +340,7 @@ describe('API Service', () => {
   describe('Error Handling', () => {
     it('should handle network errors', async () => {
       const networkError = new Error('Network Error')
-      axios.get.mockRejectedValue(networkError)
+      mockClient.get.mockRejectedValue(networkError)
 
       await expect(getAssessments()).rejects.toThrow('Network Error')
     })
@@ -324,10 +349,10 @@ describe('API Service', () => {
       const error = {
         response: {
           status: 404,
-          data: { message: 'Not found' }
-        }
+          data: { message: 'Not found' },
+        },
       }
-      axios.get.mockRejectedValue(error)
+      mockClient.get.mockRejectedValue(error)
 
       await expect(getAssessmentResults(999)).rejects.toEqual(error)
     })
@@ -336,10 +361,10 @@ describe('API Service', () => {
       const error = {
         response: {
           status: 500,
-          data: { message: 'Server error' }
-        }
+          data: { message: 'Server error' },
+        },
       }
-      axios.post.mockRejectedValue(error)
+      mockClient.post.mockRejectedValue(error)
 
       await expect(createAssessment('Test', 'Test')).rejects.toEqual(error)
     })

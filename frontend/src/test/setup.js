@@ -3,19 +3,57 @@
  * Configures testing environment for React components
  */
 
-import { expect, afterEach, vi } from 'vitest'
+import { afterEach, beforeEach, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
+import useStore from '../store/useStore'
 
-// Cleanup after each test
-afterEach(() => {
-  cleanup()
+let storageState = {}
+
+const localStorageMock = {
+  getItem: vi.fn((key) => storageState[key] ?? null),
+  setItem: vi.fn((key, value) => {
+    storageState[key] = String(value)
+  }),
+  removeItem: vi.fn((key) => {
+    delete storageState[key]
+  }),
+  clear: vi.fn(() => {
+    storageState = {}
+  }),
+}
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
 })
 
-// Mock window.matchMedia
+Object.defineProperty(globalThis, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
+})
+
+beforeEach(() => {
+  storageState = {}
+  localStorageMock.getItem.mockClear()
+  localStorageMock.setItem.mockClear()
+  localStorageMock.removeItem.mockClear()
+  localStorageMock.clear.mockClear()
+  localStorage.clear()
+  vi.spyOn(console, 'error').mockImplementation(() => {})
+  vi.spyOn(console, 'warn').mockImplementation(() => {})
+})
+
+afterEach(() => {
+  cleanup()
+  useStore.getState().resetStore()
+  vi.clearAllTimers()
+  vi.restoreAllMocks()
+})
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -27,16 +65,6 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 })
 
-// Mock localStorage
-const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
-}
-global.localStorage = localStorageMock
-
-// Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
   constructor() {}
   disconnect() {}
@@ -47,7 +75,6 @@ global.IntersectionObserver = class IntersectionObserver {
   unobserve() {}
 }
 
-// Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
   constructor() {}
   disconnect() {}

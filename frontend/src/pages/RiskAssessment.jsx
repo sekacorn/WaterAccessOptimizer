@@ -3,7 +3,7 @@
  * Create and manage water access risk assessments
  */
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { FileDown, Plus, Trash2, Eye, AlertTriangle, CheckCircle, Clock } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { createAssessment, getAssessments, deleteAssessment, runAssessment } from '../services/api'
@@ -21,11 +21,7 @@ function RiskAssessment() {
     isPublic: false
   })
 
-  useEffect(() => {
-    loadAssessments()
-  }, [])
-
-  const loadAssessments = async () => {
+  const loadAssessments = useCallback(async () => {
     try {
       const data = await getAssessments()
       setAssessments(data || [])
@@ -35,7 +31,11 @@ function RiskAssessment() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [addNotification, setAssessments])
+
+  useEffect(() => {
+    loadAssessments()
+  }, [loadAssessments])
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -92,7 +92,10 @@ function RiskAssessment() {
   }
 
   const handleDeleteAssessment = async (assessmentId, assessmentName) => {
-    if (!window.confirm(`Are you sure you want to delete "${assessmentName}"?`)) return
+    // eslint-disable-next-line no-alert
+    if (!window.confirm(`Are you sure you want to delete "${assessmentName}"?`)) {
+      return
+    }
 
     try {
       await deleteAssessment(assessmentId)
@@ -147,7 +150,7 @@ function RiskAssessment() {
         {showCreateForm && (
           <div className="card">
             <h2>Create New Assessment</h2>
-            <form onSubmit={handleCreateAssessment}>
+            <form onSubmit={handleCreateAssessment} noValidate>
               <div className="form-group">
                 <label htmlFor="name">Assessment Name *</label>
                 <input

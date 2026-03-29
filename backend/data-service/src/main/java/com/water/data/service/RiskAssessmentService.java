@@ -8,6 +8,7 @@ import com.water.data.repository.RiskAssessmentRepository;
 import com.water.data.repository.RiskResultRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +64,7 @@ public class RiskAssessmentService {
         log.info("Created risk assessment {} for user {}", assessment.getId(), userId);
 
         // 2. Get all communities (not deleted)
-        List<CommunityData> communities = communityDataRepository.findAll();
+        List<CommunityData> communities = communityDataRepository.findByUserId(UUID.fromString(userId));
         List<RiskResult> results = new ArrayList<>();
 
         log.info("Calculating risk scores for {} communities", communities.size());
@@ -90,10 +91,9 @@ public class RiskAssessmentService {
                 result.setCalculatedAt(LocalDateTime.now());
 
                 results.add(result);
-            } catch (Exception e) {
-                log.error("Failed to calculate risk score for community {}: {}",
-                    community.getId(), e.getMessage());
-                // Continue with other communities
+            } catch (DataAccessException e) {
+                log.error("Database error while calculating risk score for community {}", community.getId(), e);
+                throw e;
             }
         }
 

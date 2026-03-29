@@ -3,20 +3,23 @@
  * Interactive map with Leaflet showing communities and facilities
  */
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from 'react-leaflet'
 import { Map as MapIcon, Layers } from 'lucide-react'
 import { getAllCommunities, getAllFacilities } from '../services/api'
 import useStore from '../store/useStore'
 import 'leaflet/dist/leaflet.css'
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
+import markerIcon from 'leaflet/dist/images/marker-icon.png'
+import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 
 // Fix Leaflet default icon issue
 import L from 'leaflet'
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
 })
 
 function MapView() {
@@ -27,11 +30,7 @@ function MapView() {
   const [showFacilities, setShowFacilities] = useState(true)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadMapData()
-  }, [])
-
-  const loadMapData = async () => {
+  const loadMapData = useCallback(async () => {
     try {
       const [communitiesData, facilitiesData] = await Promise.all([
         getAllCommunities(),
@@ -45,16 +44,11 @@ function MapView() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const getRiskColor = (riskLevel) => {
-    switch (riskLevel) {
-      case 'HIGH': return '#e74c3c'
-      case 'MEDIUM': return '#f39c12'
-      case 'LOW': return '#27ae60'
-      default: return '#3498db'
-    }
-  }
+  useEffect(() => {
+    loadMapData()
+  }, [loadMapData])
 
   if (loading) {
     return (
@@ -104,13 +98,14 @@ function MapView() {
             />
 
             {/* Communities */}
-            {showCommunities && communities && communities.features && communities.features.map((feature, idx) => {
+            {showCommunities && communities && communities.features && communities.features.map((feature) => {
               const [lng, lat] = feature.geometry.coordinates
               const props = feature.properties
+              const key = props.communityId || props.communityName || `${lat}-${lng}`
 
               return (
                 <CircleMarker
-                  key={`community-${idx}`}
+                  key={key}
                   center={[lat, lng]}
                   radius={8}
                   fillColor="#3498db"
@@ -128,12 +123,13 @@ function MapView() {
             })}
 
             {/* Facilities */}
-            {showFacilities && facilities && facilities.features && facilities.features.map((feature, idx) => {
+            {showFacilities && facilities && facilities.features && facilities.features.map((feature) => {
               const [lng, lat] = feature.geometry.coordinates
               const props = feature.properties
+              const key = props.facilityId || props.facilityName || `${lat}-${lng}`
 
               return (
-                <Marker key={`facility-${idx}`} position={[lat, lng]}>
+                <Marker key={key} position={[lat, lng]}>
                   <Popup>
                     <strong>{props.facilityName || 'Facility'}</strong><br />
                     Type: {props.facilityType || 'N/A'}<br />

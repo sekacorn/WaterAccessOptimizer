@@ -1,38 +1,36 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
-import { Droplet, Globe, BarChart3, Users, Brain, Shield, Zap, TrendingUp, Map, Award } from 'lucide-react'
+import { Droplet, Globe, BarChart3, Users, Shield, Zap, TrendingUp, Map, Award } from 'lucide-react'
 import './Landing.css'
 
 /**
  * Landing Page Component
  *
- * Public landing page for WaterAccessOptimizer
- * Shows features, benefits, and calls to action for new users
+ * Public landing page for WaterAccessOptimizer.
+ * Highlights the current MVP workflow and demo-ready experience.
  */
 function Landing() {
   return (
     <div className="landing">
-      {/* Hero Section */}
       <section className="hero">
         <div className="hero-content">
           <div className="hero-badge">
             <Droplet size={24} />
-            <span>Advancing Water Access Worldwide</span>
+            <span>Water access planning with practical analytics</span>
           </div>
 
           <h1 className="hero-title">
             Optimize Water Access with
-            <span className="gradient-text"> AI-Powered Insights</span>
+            <span className="gradient-text"> Data-Driven Insights</span>
           </h1>
 
           <p className="hero-subtitle">
-            Analyze hydrological data, visualize water infrastructure in 3D, and get AI-driven predictions
-            to improve water access for communities worldwide.
+            Upload datasets, visualize communities and facilities on an interactive map, and run
+            explainable risk assessments from one web application.
           </p>
 
           <div className="hero-cta">
             <Link to="/register" className="btn btn-primary-large">
-              Get Started Free
+              Create Account
             </Link>
             <Link to="/login" className="btn btn-secondary-large">
               Sign In
@@ -41,27 +39,26 @@ function Landing() {
 
           <div className="hero-stats">
             <div className="stat">
-              <div className="stat-value">1M+</div>
-              <div className="stat-label">Data Points Analyzed</div>
+              <div className="stat-value">CSV</div>
+              <div className="stat-label">Hydro, community, and infrastructure uploads</div>
             </div>
             <div className="stat">
-              <div className="stat-value">50+</div>
-              <div className="stat-label">Countries Served</div>
+              <div className="stat-value">Map</div>
+              <div className="stat-label">Interactive facility and community layers</div>
             </div>
             <div className="stat">
-              <div className="stat-value">99.9%</div>
-              <div className="stat-label">Prediction Accuracy</div>
+              <div className="stat-value">Risk</div>
+              <div className="stat-label">Assessment results and downloadable exports</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="features">
         <div className="container">
           <div className="section-header">
-            <h2>Powerful Features for Water Management</h2>
-            <p>Everything you need to analyze, visualize, and optimize water access</p>
+            <h2>Current Release Features</h2>
+            <p>The shipped app is focused on a clear MVP workflow that is easy to demo and extend.</p>
           </div>
 
           <div className="features-grid">
@@ -69,138 +66,176 @@ function Landing() {
               <div className="feature-icon">
                 <Globe size={32} />
               </div>
-              <h3>3D Visualization</h3>
-              <p>Interactive 3D maps powered by Three.js to visualize hydrological data, infrastructure, and water networks in stunning detail.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">
-                <Brain size={32} />
-              </div>
-              <h3>AI Predictions</h3>
-              <p>Machine learning models predict water availability, quality issues, and optimal management strategies for your region.</p>
+              <h3>Interactive Mapping</h3>
+              <p>
+                Explore uploaded communities and facilities on a Leaflet-powered map with
+                popups and layer toggles.
+              </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">
                 <BarChart3 size={32} />
               </div>
-              <h3>Data Analysis</h3>
-              <p>Analyze hydrological data from USGS, WHO, and custom sources. Upload CSV, JSON, or GeoJSON files for instant insights.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">
-                <Users size={32} />
-              </div>
-              <h3>Collaboration</h3>
-              <p>Real-time collaboration with team members. Share visualizations, annotations, and insights across your organization.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">
-                <Shield size={32} />
-              </div>
-              <h3>Enterprise Security</h3>
-              <p>SSO integration, MFA, role-based access control, and audit logs. Bank-level security for your sensitive water data.</p>
+              <h3>Risk Assessment</h3>
+              <p>
+                Create assessments, review score breakdowns, and inspect filtered result
+                tables with chart summaries.
+              </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">
                 <Zap size={32} />
               </div>
-              <h3>MBTI Personalization</h3>
-              <p>Tailored experience based on your personality type. Different workflows for analytical thinkers vs. creative problem-solvers.</p>
+              <h3>Demo Mode</h3>
+              <p>
+                Run the frontend with seeded mock data for screenshots, walkthroughs, and
+                release previews without logging in.
+              </p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">
+                <Users size={32} />
+              </div>
+              <h3>Dashboard Overview</h3>
+              <p>
+                See recent uploads, assessments, and storage quota usage immediately after
+                sign-in.
+              </p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">
+                <Shield size={32} />
+              </div>
+              <h3>Secure Access</h3>
+              <p>
+                Email and password authentication, token-based sessions, and protected routes
+                cover the current MVP flow.
+              </p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">
+                <TrendingUp size={32} />
+              </div>
+              <h3>Export Workflow</h3>
+              <p>
+                Download assessment outputs and use them in stakeholder reporting, review
+                sessions, and planning documents.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
       <section className="how-it-works">
         <div className="container">
           <div className="section-header">
             <h2>How It Works</h2>
-            <p>Get started in minutes with our simple workflow</p>
+            <p>The core workflow is intentionally short and demo-friendly.</p>
           </div>
 
           <div className="steps">
             <div className="step">
               <div className="step-number">1</div>
               <div className="step-content">
-                <h3>Upload Your Data</h3>
-                <p>Import hydrological data, community information, or infrastructure details from multiple sources.</p>
+                <h3>Upload Data</h3>
+                <p>
+                  Import hydrological, community, or infrastructure CSV files and review
+                  validation feedback.
+                </p>
               </div>
             </div>
 
             <div className="step">
               <div className="step-number">2</div>
               <div className="step-content">
-                <h3>Analyze & Visualize</h3>
-                <p>Create stunning 3D visualizations and get AI-powered insights about water availability and quality.</p>
+                <h3>Assess and Visualize</h3>
+                <p>
+                  Review uploaded records on the dashboard, inspect them on the map, and run a
+                  risk assessment.
+                </p>
               </div>
             </div>
 
             <div className="step">
               <div className="step-number">3</div>
               <div className="step-content">
-                <h3>Collaborate & Act</h3>
-                <p>Share findings with your team, export reports, and implement data-driven water management strategies.</p>
+                <h3>Review and Export</h3>
+                <p>
+                  Filter the results, inspect the charts, and export the outputs for planning
+                  and stakeholder communication.
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* User Roles Section */}
       <section className="roles">
         <div className="container">
           <div className="section-header">
-            <h2>Built for Everyone</h2>
-            <p>From individual researchers to large enterprises</p>
+            <h2>Built for Teams That Need a Working Baseline</h2>
+            <p>
+              The release is useful as both a demo environment and an extensible starting
+              point.
+            </p>
           </div>
 
           <div className="roles-grid">
             <div className="role-card">
               <Award size={48} />
-              <h3>Researchers</h3>
-              <p>Free tier with all core features. Analyze data, create visualizations, and collaborate with peers.</p>
-              <Link to="/register" className="role-link">Start Free →</Link>
+              <h3>Analysts</h3>
+              <p>
+                Upload datasets, run assessments, and inspect current results from a single
+                browser-based workflow.
+              </p>
+              <Link to="/register" className="role-link">Get started</Link>
             </div>
 
             <div className="role-card">
               <Users size={48} />
-              <h3>Organizations</h3>
-              <p>Team collaboration, advanced analytics, priority support, and custom integrations.</p>
-              <Link to="/register" className="role-link">Contact Sales →</Link>
+              <h3>Demo Owners</h3>
+              <p>
+                Use the seeded frontend demo mode to capture screenshots and walk stakeholders
+                through the product quickly.
+              </p>
+              <Link to="/login" className="role-link">Open app</Link>
             </div>
 
             <div className="role-card">
               <TrendingUp size={48} />
-              <h3>Enterprises</h3>
-              <p>SSO, unlimited users, dedicated support, SLA guarantees, and custom AI models.</p>
-              <Link to="/register" className="role-link">Get Enterprise →</Link>
+              <h3>Builders</h3>
+              <p>
+                Fork the codebase and evolve the services, data model, and deployment stack
+                for your release roadmap.
+              </p>
+              <Link to="/register" className="role-link">Review source</Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="cta">
         <div className="container">
           <div className="cta-content">
             <Map size={64} className="cta-icon" />
-            <h2>Ready to Transform Water Access?</h2>
-            <p>Join thousands of researchers, NGOs, and governments using WaterAccessOptimizer to improve water security worldwide.</p>
+            <h2>Ready to Prepare the Release?</h2>
+            <p>
+              Start from the MVP workflow for uploads, mapping, and risk assessment, then
+              harden the backend services as needed.
+            </p>
             <Link to="/register" className="btn btn-primary-large">
               Create Free Account
             </Link>
-            <p className="cta-note">No credit card required • Free tier available forever</p>
+            <p className="cta-note">Open source and ready for local demo mode</p>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="landing-footer">
         <div className="container">
           <div className="footer-content">
@@ -209,37 +244,40 @@ function Landing() {
                 <Droplet size={32} />
                 <h3>WaterAccessOptimizer</h3>
               </div>
-              <p>Open-source solution for advancing water security and access worldwide.</p>
+              <p>
+                Open-source tooling for water access data uploads, mapping, and assessment
+                workflows.
+              </p>
             </div>
 
             <div className="footer-section">
-              <h4>Product</h4>
-              <Link to="/features">Features</Link>
-              <Link to="/pricing">Pricing</Link>
-              <Link to="/docs">Documentation</Link>
+              <h4>App</h4>
+              <Link to="/register">Register</Link>
+              <Link to="/login">Login</Link>
+              <Link to="/dashboard">Dashboard</Link>
             </div>
 
             <div className="footer-section">
-              <h4>Company</h4>
-              <Link to="/about">About Us</Link>
-              <Link to="/contact">Contact</Link>
-              <Link to="/careers">Careers</Link>
+              <h4>Workflows</h4>
+              <Link to="/upload">Uploads</Link>
+              <Link to="/map">Map</Link>
+              <Link to="/assessment">Assessments</Link>
             </div>
 
             <div className="footer-section">
-              <h4>Resources</h4>
-              <Link to="/blog">Blog</Link>
-              <Link to="/guides">Guides</Link>
-              <Link to="/api">API Docs</Link>
+              <h4>Release</h4>
+              <Link to="/">Overview</Link>
+              <Link to="/login">Sign in</Link>
+              <Link to="/assessment">Results</Link>
             </div>
           </div>
 
           <div className="footer-bottom">
-            <p>&copy; 2024 WaterAccessOptimizer. All rights reserved.</p>
+            <p>&copy; 2026 WaterAccessOptimizer.</p>
             <div className="footer-links">
-              <Link to="/privacy">Privacy Policy</Link>
-              <Link to="/terms">Terms of Service</Link>
-              <Link to="/security">Security</Link>
+              <Link to="/">Home</Link>
+              <Link to="/login">Login</Link>
+              <Link to="/register">Register</Link>
             </div>
           </div>
         </div>

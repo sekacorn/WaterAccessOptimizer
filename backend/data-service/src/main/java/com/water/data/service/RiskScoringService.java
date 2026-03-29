@@ -1,5 +1,7 @@
 package com.water.data.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.water.data.model.CommunityData;
 import com.water.data.model.HydroData;
 import com.water.data.model.InfrastructureData;
@@ -40,6 +42,7 @@ public class RiskScoringService {
     private final HydroDataRepository hydroDataRepository;
     private final CommunityDataRepository communityDataRepository;
     private final InfrastructureDataRepository infrastructureDataRepository;
+    private final ObjectMapper objectMapper;
 
     // Weights for multi-criteria analysis (must sum to 1.0)
     private static final double WATER_QUALITY_WEIGHT = 0.35;
@@ -62,6 +65,21 @@ public class RiskScoringService {
      * Calculates risk score for a single community.
      */
     public RiskScoreResult calculateRiskScore(CommunityData community) {
+        if (community == null || community.getCoordinates() == null) {
+            return RiskScoreResult.builder()
+                .communityId(community != null ? community.getId() : null)
+                .overallScore(50)
+                .riskLevel(RiskAssessment.RiskLevel.MEDIUM)
+                .waterQualityScore(50)
+                .accessDistanceScore(50)
+                .infrastructureScore(80)
+                .populationPressureScore(30)
+                .confidenceLevel(RiskAssessment.ConfidenceLevel.NONE)
+                .sampleCount(0)
+                .explanationJson(generateExplanation(50, 50, 80, 30))
+                .build();
+        }
+
         // 1. Calculate component scores
         int waterQualityScore = calculateWaterQualityScore(community);
         int accessDistanceScore = calculateAccessDistanceScore(community);
@@ -126,35 +144,26 @@ public class RiskScoringService {
         for (HydroData hydro : measurements) {
             int measurementRisk = 0;
 
-            // Arsenic check
-            if (hydro.getArsenicMgL() != null) {
-                double arsenicRatio = hydro.getArsenicMgL() / WHO_ARSENIC_LIMIT;
-                if (arsenicRatio > 2.0) measurementRisk += 25;
-                else if (arsenicRatio > 1.0) measurementRisk += 15;
-                else if (arsenicRatio > 0.5) measurementRisk += 5;
-            }
+            String parameter = hydro.getParameterName() != null
+                ? hydro.getParameterName().trim().toLowerCase(Locale.ROOT)
+                : "";
 
-            // Fluoride check
-            if (hydro.getFluorideMgL() != null) {
-                double fluorideRatio = hydro.getFluorideMgL() / WHO_FLUORIDE_LIMIT;
-                if (fluorideRatio > 2.0) measurementRisk += 25;
-                else if (fluorideRatio > 1.0) measurementRisk += 15;
-                else if (fluorideRatio > 0.5) measurementRisk += 5;
-            }
+            double measurementValue = hydro.getMeasurementValue() != null
+                ? hydro.getMeasurementValue().doubleValue()
+                : 0.0;
 
-            // Nitrate check
-            if (hydro.getNitrateMgL() != null) {
-                double nitrateRatio = hydro.getNitrateMgL() / WHO_NITRATE_LIMIT;
-                if (nitrateRatio > 2.0) measurementRisk += 25;
-                else if (nitrateRatio > 1.0) measurementRisk += 15;
-                else if (nitrateRatio > 0.5) measurementRisk += 5;
-            }
-
-            // E. coli check
-            if (hydro.getEcoliCfu100ml() != null && hydro.getEcoliCfu100ml() > WHO_ECOLI_LIMIT) {
-                if (hydro.getEcoliCfu100ml() > 100) measurementRisk += 25;
-                else if (hydro.getEcoliCfu100ml() > 10) measurementRisk += 15;
-                else measurementRisk += 5;
+            if ("arsenic".equals(parameter)) {
+                measurementRisk += scoreThresholdRatio(measurementValue, WHO_ARSENIC_LIMIT);
+            } else if ("fluoride".equals(parameter)) {
+                measurementRisk += scoreThresholdRatio(measurementValue, WHO_FLUORIDE_LIMIT);
+            } else if ("nitrate".equals(parameter)) {
+                measurementRisk += scoreThresholdRatio(measurementValue, WHO_NITRATE_LIMIT);
+            } else if ("e_coli".equals(parameter) || "e.coli".equals(parameter) || "ecoli".equals(parameter)) {
+                if (measurementValue > WHO_ECOLI_LIMIT) {
+                    if (measurementValue > 100) measurementRisk += 25;
+                    else if (measurementValue > 10) measurementRisk += 15;
+                    else measurementRisk += 5;
+                }
             }
 
             // Cap individual measurement risk at 100
@@ -229,7 +238,7 @@ public class RiskScoringService {
 
         // Count operational vs non-operational facilities
         long operational = facilities.stream()
-            .filter(f -> "OPERATIONAL".equalsIgnoreCase(f.getOperationalStatus()))
+            .filter(InfrastructureData::isOperational)
             .count();
 
         long total = facilities.size();
@@ -268,7 +277,7 @@ public class RiskScoringService {
         );
 
         long operationalFacilities = facilities.stream()
-            .filter(f -> "OPERATIONAL".equalsIgnoreCase(f.getOperationalStatus()))
+            .filter(InfrastructureData::isOperational)
             .count();
 
         // Calculate people per facility
@@ -322,6 +331,9 @@ public class RiskScoringService {
      * Counts water quality measurements within 5km of community.
      */
     private int countNearbyMeasurements(CommunityData community) {
+        if (community == null || community.getCoordinates() == null) {
+            return 0;
+        }
         List<HydroData> measurements = hydroDataRepository.findWithinRadius(
             community.getCoordinates().getX(),
             community.getCoordinates().getY(),
@@ -375,22 +387,15 @@ public class RiskScoringService {
             .limit(3)
             .collect(Collectors.toList());
 
-        // Build JSON manually (simple format)
-        StringBuilder json = new StringBuilder("[");
-        for (int i = 0; i < topFactors.size(); i++) {
-            Map<String, Object> factor = topFactors.get(i);
-            if (i > 0) json.append(",");
-            json.append(String.format(
-                "{\"factor\":\"%s\",\"score\":%d,\"weight\":%.2f,\"contribution\":%.2f}",
-                factor.get("factor"),
-                factor.get("score"),
-                factor.get("weight"),
-                factor.get("contribution")
-            ));
-        }
-        json.append("]");
+        Map<String, Object> explanation = new LinkedHashMap<>();
+        explanation.put("topFactors", topFactors);
+        explanation.put("recommendations", buildRecommendations(topFactors));
 
-        return json.toString();
+        try {
+            return objectMapper.writeValueAsString(explanation);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to serialize risk explanation", e);
+        }
     }
 
     /**
@@ -398,6 +403,9 @@ public class RiskScoringService {
      * Returns distance in meters.
      */
     private double calculateDistance(CommunityData community, org.locationtech.jts.geom.Point point) {
+        if (community == null || community.getCoordinates() == null || point == null) {
+            return Double.MAX_VALUE;
+        }
         double lat1 = Math.toRadians(community.getCoordinates().getY());
         double lon1 = Math.toRadians(community.getCoordinates().getX());
         double lat2 = Math.toRadians(point.getY());
@@ -414,6 +422,30 @@ public class RiskScoringService {
 
         final double EARTH_RADIUS_METERS = 6371000;
         return EARTH_RADIUS_METERS * c;
+    }
+
+    private int scoreThresholdRatio(double measurementValue, double threshold) {
+        double ratio = measurementValue / threshold;
+        if (ratio > 2.0) return 25;
+        if (ratio > 1.0) return 15;
+        if (ratio > 0.5) return 5;
+        return 0;
+    }
+
+    private List<String> buildRecommendations(List<Map<String, Object>> topFactors) {
+        List<String> recommendations = new ArrayList<>();
+        for (Map<String, Object> factor : topFactors) {
+            String factorName = (String) factor.get("factor");
+            switch (factorName) {
+                case "Water Quality" -> recommendations.add("Investigate contaminants and prioritize water quality treatment.");
+                case "Access Distance" -> recommendations.add("Add or rehabilitate nearby water access points to reduce travel distance.");
+                case "Infrastructure" -> recommendations.add("Repair non-operational facilities and improve preventive maintenance.");
+                case "Population Pressure" -> recommendations.add("Expand local capacity to reduce pressure on existing facilities.");
+                default -> {
+                }
+            }
+        }
+        return recommendations;
     }
 
     /**

@@ -20,6 +20,13 @@ public class UserRepository {
     private final Map<String, UUID> emailIndex = new ConcurrentHashMap<>();
 
     public User save(User user) {
+        if (user.getId() == null) {
+            user.setId(UUID.randomUUID());
+        }
+        if (user.getCreatedAt() == null) {
+            user.setCreatedAt(java.time.LocalDateTime.now());
+        }
+        user.setUpdatedAt(java.time.LocalDateTime.now());
         store.put(user.getId(), user);
         emailIndex.put(user.getEmail(), user.getId());
         return user;

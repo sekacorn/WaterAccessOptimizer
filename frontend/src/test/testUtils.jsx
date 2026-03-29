@@ -19,7 +19,12 @@ export function renderWithRouter(ui, options = {}) {
   window.history.pushState({}, 'Test page', route)
 
   return render(
-    <BrowserRouter>
+    <BrowserRouter
+      future={{
+        v7_relativeSplatPath: true,
+        v7_startTransition: true,
+      }}
+    >
       {ui}
     </BrowserRouter>,
     renderOptions
