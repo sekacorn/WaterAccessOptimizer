@@ -1,5 +1,7 @@
 # Service Boundaries - MVP Architecture
 
+> Status: planning/reference doc. The current packaged release paths are documented in [ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md).
+
 **Water Access Optimizer - Service Consolidation Plan**
 
 Version: 0.1.0 (MVP)

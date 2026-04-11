@@ -1,4 +1,6 @@
 # ML/LLM Integration Roadmap
+> Status: future roadmap, not shipped functionality.
+
 **Version:** 1.0.0
 **Last Updated:** 2026-02-03
 **Status:** POST-MVP (V1/V2 Features)

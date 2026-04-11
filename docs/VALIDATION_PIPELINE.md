@@ -1,5 +1,7 @@
 # Complete Validation Pipeline Guide
 
+> Status: reference guide. Confirm implementation details against the current shipped services and UI before relying on this operationally.
+
 ## Overview
 
 The WaterAccessOptimizer validation pipeline implements a comprehensive **5-stage validation system** to ensure data quality, provide user-friendly error messages, and calculate confidence levels for uploaded data.

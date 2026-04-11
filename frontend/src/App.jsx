@@ -8,7 +8,19 @@
 
 import { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
-import { Droplet, LogOut, User as UserIcon, Upload, Map, BarChart3, FileDown } from 'lucide-react'
+import {
+  AlertCircle,
+  CheckCircle2,
+  Droplet,
+  FileDown,
+  Info,
+  LogOut,
+  Map,
+  Upload,
+  User as UserIcon,
+  XCircle,
+  BarChart3
+} from 'lucide-react'
 
 // Lazy load page components for code splitting
 const Landing = lazy(() => import('./pages/Landing'))
@@ -19,6 +31,9 @@ const DataUpload = lazy(() => import('./pages/DataUpload'))
 const MapView = lazy(() => import('./pages/MapView'))
 const RiskAssessment = lazy(() => import('./pages/RiskAssessment'))
 const AssessmentResults = lazy(() => import('./pages/AssessmentResults'))
+const PrivacyNotice = lazy(() => import('./pages/PrivacyNotice'))
+const AccessibilityStatement = lazy(() => import('./pages/AccessibilityStatement'))
+const SecurityCompliance = lazy(() => import('./pages/SecurityCompliance'))
 
 // Components (not lazy loaded - small and frequently used)
 import ProtectedRoute from './components/ProtectedRoute'
@@ -120,20 +135,71 @@ function Navigation() {
   )
 }
 
+function NotificationRegion() {
+  const { notifications, removeNotification } = useStore()
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'success':
+        return <CheckCircle2 size={18} aria-hidden="true" />
+      case 'error':
+        return <XCircle size={18} aria-hidden="true" />
+      case 'warning':
+        return <AlertCircle size={18} aria-hidden="true" />
+      default:
+        return <Info size={18} aria-hidden="true" />
+    }
+  }
+
+  if (notifications.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="notification-region" aria-live="polite" aria-atomic="false">
+      {notifications.map((notification) => (
+        <div
+          key={notification.id}
+          className={`notification-toast ${notification.type || 'info'}`}
+          role={notification.type === 'error' ? 'alert' : 'status'}
+        >
+          <div className="notification-content">
+            {getNotificationIcon(notification.type)}
+            <span>{notification.message}</span>
+          </div>
+          <button
+            type="button"
+            className="notification-dismiss"
+            aria-label="Dismiss notification"
+            onClick={() => removeNotification(notification.id)}
+          >
+            ×
+          </button>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function App() {
   return (
     <Router>
       <div className="app">
+        <a className="skip-link" href="#main-content">Skip to main content</a>
         <Navigation />
+        <NotificationRegion />
 
         {/* Main Content with Suspense for lazy-loaded routes */}
-        <main className="app-main">
+        <main id="main-content" className="app-main" tabIndex="-1">
           <Suspense fallback={<PageLoader />}>
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/privacy" element={<PrivacyNotice />} />
+              <Route path="/accessibility" element={<AccessibilityStatement />} />
+              <Route path="/security" element={<SecurityCompliance />} />
 
               {/* Protected routes - require authentication */}
               <Route path="/dashboard" element={
@@ -172,6 +238,11 @@ function App() {
             <p className="footer-disclaimer">
               Multi-criteria analysis for water security planning
             </p>
+            <nav className="footer-links" aria-label="Compliance and policy links">
+              <Link to="/privacy">Privacy Notice</Link>
+              <Link to="/accessibility">Accessibility Statement</Link>
+              <Link to="/security">Security and Compliance</Link>
+            </nav>
           </div>
         </footer>
       </div>

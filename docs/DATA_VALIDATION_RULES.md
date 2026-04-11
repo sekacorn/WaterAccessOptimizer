@@ -1,5 +1,7 @@
 # Data Validation Rules - MVP v0.1.0
 
+> Status: validation reference. Current release behavior should always be checked against the active frontend and backend code paths.
+
 **Based on**: Agent 02 (Data Sources) + Agent 03 (Domain Model/DB Schema)
 **Last Updated**: 2026-02-02 (Iteration 4)
 

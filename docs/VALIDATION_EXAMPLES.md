@@ -1,5 +1,7 @@
 # Validation Examples for WaterAccessOptimizer
 
+> Status: examples/reference. They illustrate validation concepts but should be checked against the current active upload implementation.
+
 This document provides real-world validation examples showing how the 5-stage validation pipeline works.
 
 ## Table of Contents

@@ -1,4 +1,6 @@
 # WHO Water Quality Guidelines Reference
+> Status: standards reference. Use the underlying WHO source and current scoring implementation together when making product or policy decisions.
+
 **Version:** 1.0.0
 **Last Updated:** 2026-02-03
 **Source:** WHO Guidelines for Drinking-water Quality (4th Edition)

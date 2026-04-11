@@ -1,5 +1,7 @@
 # Service Contracts
 
+> Status: historical/reference contract document. Validate every route, service name, and port against the current release docs before implementation or release use.
+
 **Water Access Optimizer - MVP Service API Contracts**
 
 Version: 0.1.0 (MVP)

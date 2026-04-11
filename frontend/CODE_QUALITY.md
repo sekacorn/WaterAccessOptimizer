@@ -1,5 +1,7 @@
 # Code Quality & Optimization Guide
 
+This guide is a frontend engineering reference for the current release, not a guarantee that every historical optimization idea in the repository is still active.
+
 **Water Access Optimizer - Frontend Best Practices**
 
 ---

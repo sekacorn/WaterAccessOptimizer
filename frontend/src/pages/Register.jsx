@@ -108,7 +108,7 @@ function Register() {
 
         <form onSubmit={handleSubmit} className="auth-form">
           {error && (
-            <div className="error-banner">
+            <div className="error-banner" role="alert" aria-live="assertive">
               <AlertCircle size={20} />
               <span>{error}</span>
             </div>
@@ -220,6 +220,9 @@ function Register() {
         <div className="auth-footer">
           <p>
             Already have an account? <Link to="/login">Sign in</Link>
+          </p>
+          <p>
+            <Link to="/privacy">Privacy Notice</Link> | <Link to="/accessibility">Accessibility</Link>
           </p>
         </div>
       </div>

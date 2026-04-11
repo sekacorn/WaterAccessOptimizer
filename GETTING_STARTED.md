@@ -195,3 +195,7 @@ During release prep, the frontend was verified with:
 - `npm run lint`
 - `npm run test -- --run`
 - `npm run build`
+
+## Compliance Notes
+
+This release includes readiness-oriented security, privacy, and accessibility improvements. It is suitable for further deployment-specific review against NIST secure development practices, GDPR obligations, and Section 508 expectations, but it should not be marketed as formally certified.

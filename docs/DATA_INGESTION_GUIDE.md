@@ -1,5 +1,7 @@
 # Data Ingestion Guide for WaterAccessOptimizer
 
+> Status: reference guide. Use it together with the current release docs and validate details against the active data-service runtime path.
+
 ## Overview
 
 This guide covers the complete data ingestion pipeline for WaterAccessOptimizer, from CSV upload to database storage. The system uses a **5-stage validation pipeline** to ensure data quality and provide user-friendly error reporting.

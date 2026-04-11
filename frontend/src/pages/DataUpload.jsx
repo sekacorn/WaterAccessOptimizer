@@ -3,7 +3,7 @@
  * CSV file upload with validation feedback and history
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Upload, FileText, AlertCircle, CheckCircle, Trash2, XCircle } from 'lucide-react'
 import { uploadHydroData, uploadCommunityData, uploadInfrastructureData, getUploads, deleteUpload } from '../services/api'
 import useStore from '../store/useStore'
@@ -15,6 +15,7 @@ function DataUpload() {
   const [uploading, setUploading] = useState(false)
   const [uploadResult, setUploadResult] = useState(null)
   const [dragActive, setDragActive] = useState(false)
+  const fileInputRef = useRef(null)
 
   const loadUploads = useCallback(async () => {
     try {
@@ -60,6 +61,13 @@ function DataUpload() {
       setUploadResult(null)
     } else {
       addNotification({ type: 'error', message: 'Please drop a CSV file' })
+    }
+  }
+
+  const handleDropzoneKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      fileInputRef.current?.click()
     }
   }
 
@@ -125,8 +133,9 @@ function DataUpload() {
           <h2>Upload CSV File</h2>
 
           <div className="form-group">
-            <label>Data Type</label>
+            <label htmlFor="data-type">Data Type</label>
             <select
+              id="data-type"
               value={dataType}
               onChange={(e) => setDataType(e.target.value)}
               className="select-input"
@@ -143,6 +152,10 @@ function DataUpload() {
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
+            onKeyDown={handleDropzoneKeyDown}
+            tabIndex="0"
+            role="button"
+            aria-describedby="upload-instructions"
           >
             <FileText size={48} />
             {selectedFile ? (
@@ -156,12 +169,16 @@ function DataUpload() {
                 <p>or click to browse</p>
               </>
             )}
+            <p id="upload-instructions" className="helper-text">
+              Upload CSV files only. Use the keyboard to focus this area and press Enter to choose a file.
+            </p>
             <input
               type="file"
               accept=".csv"
               onChange={handleFileChange}
-              style={{ display: 'none' }}
+              className="sr-only"
               id="file-input"
+              ref={fileInputRef}
             />
             <label htmlFor="file-input" className="btn-secondary">
               Choose File
@@ -234,46 +251,52 @@ function DataUpload() {
         <div className="card">
           <h2>Upload History</h2>
           {uploads.length > 0 ? (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Filename</th>
-                  <th>Type</th>
-                  <th>Rows</th>
-                  <th>Status</th>
-                  <th>Uploaded</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {uploads.map(upload => (
-                  <tr key={upload.id}>
-                    <td>{upload.filename}</td>
-                    <td>
-                      <span className={`badge ${upload.dataType.toLowerCase()}`}>
-                        {upload.dataType}
-                      </span>
-                    </td>
-                    <td>{upload.rowCount}</td>
-                    <td>
-                      <span className={`status ${upload.validationStatus.toLowerCase()}`}>
-                        {upload.validationStatus}
-                      </span>
-                    </td>
-                    <td>{new Date(upload.uploadedAt).toLocaleDateString()}</td>
-                    <td>
-                      <button
-                        onClick={() => handleDelete(upload.id)}
-                        className="btn-icon"
-                        title="Delete"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
+            <div className="table-responsive">
+              <table className="data-table">
+                <caption className="table-caption">
+                  Recent CSV uploads with validation status and record counts.
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Filename</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Rows</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Uploaded</th>
+                    <th scope="col">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {uploads.map(upload => (
+                    <tr key={upload.id}>
+                      <td>{upload.filename}</td>
+                      <td>
+                        <span className={`badge ${upload.dataType.toLowerCase()}`}>
+                          {upload.dataType}
+                        </span>
+                      </td>
+                      <td>{upload.rowCount}</td>
+                      <td>
+                        <span className={`status ${upload.validationStatus.toLowerCase()}`}>
+                          {upload.validationStatus}
+                        </span>
+                      </td>
+                      <td>{new Date(upload.uploadedAt).toLocaleDateString()}</td>
+                      <td>
+                        <button
+                          onClick={() => handleDelete(upload.id)}
+                          className="btn-icon"
+                          title="Delete"
+                          aria-label={`Delete upload ${upload.filename}`}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <p>No uploads yet. Upload your first dataset above.</p>
           )}

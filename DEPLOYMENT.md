@@ -136,6 +136,7 @@ These checks passed during the current release-prep pass.
 5. Check auth, data service, and frontend health endpoints.
 6. Perform one manual sign-in flow or one demo-mode walkthrough.
 7. Verify uploads, map, and assessment pages render correctly.
+8. Review [docs/COMPLIANCE_READINESS.md](./docs/COMPLIANCE_READINESS.md) and set operator-owned privacy, retention, incident response, and accessibility support procedures.
 
 ## Local Demo Deployment
 

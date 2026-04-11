@@ -1,4 +1,6 @@
 # API Contracts - MVP Specification
+> Status: reference documentation. Validate routes, ports, and packaged service paths against [ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md) and [../README.md](../README.md) before treating this as release truth.
+
 **Version:** 1.0.0
 **Last Updated:** 2026-02-03
 **Status:** MVP (Iteration 7)

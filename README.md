@@ -143,10 +143,24 @@ Recent release-prep fixes included:
 
 ## Documentation
 
+- Root release guides:
 - [GETTING_STARTED.md](./GETTING_STARTED.md)
 - [DEPLOYMENT.md](./DEPLOYMENT.md)
+- [docs/COMPLIANCE_READINESS.md](./docs/COMPLIANCE_READINESS.md)
 - [docs/ARCHITECTURE_OVERVIEW.md](./docs/ARCHITECTURE_OVERVIEW.md)
 - [docs/SERVICE_BOUNDARIES_MVP.md](./docs/SERVICE_BOUNDARIES_MVP.md)
+
+Reference and historical docs in `docs/` have been trimmed or marked accordingly so they do not override the release guides above.
+
+## Compliance Readiness
+
+This release is being prepared for:
+
+- NIST-aligned secure development readiness
+- GDPR-oriented privacy-by-design readiness
+- Section 508 and WCAG accessibility readiness
+
+It does not claim formal certification. The current implementation adds practical controls such as stronger secret handling, authentication safeguards, browser security headers, public privacy and accessibility pages, and improved keyboard and screen-reader support in key workflows.
 
 ## Known Limits
 

@@ -1,4 +1,6 @@
 # PostGIS Spatial Queries Reference
+> Status: database reference. Confirm schema compatibility before using these patterns in the currently packaged runtime.
+
 **Version:** 1.0.0
 **Last Updated:** 2026-02-03
 **Status:** MVP (Iteration 7)

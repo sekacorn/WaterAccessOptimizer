@@ -76,7 +76,7 @@ function Login() {
 
         <form onSubmit={handleSubmit} className="auth-form">
           {error && (
-            <div className="error-banner">
+            <div className="error-banner" role="alert" aria-live="assertive">
               <AlertCircle size={20} />
               <span>{error}</span>
             </div>
@@ -135,6 +135,9 @@ function Login() {
         <div className="auth-footer">
           <p>
             Don&apos;t have an account? <Link to="/register">Sign up</Link>
+          </p>
+          <p>
+            <Link to="/privacy">Privacy Notice</Link> | <Link to="/accessibility">Accessibility</Link>
           </p>
         </div>
       </div>

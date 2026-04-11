@@ -130,6 +130,8 @@ function AssessmentResults() {
 
   const summary = results.summary || {}
   const records = getFilteredRecords()
+  const riskSummaryText = `${summary.highRiskCount || 0} high-risk, ${summary.mediumRiskCount || 0} medium-risk, and ${summary.lowRiskCount || 0} low-risk records out of ${summary.totalRecords || 0} total records.`
+  const componentSummaryText = `Average component scores are water quality ${summary.avgWaterQuality || 0}, distance ${summary.avgDistance || 0}, reliability ${summary.avgReliability || 0}, population density ${summary.avgPopulationDensity || 0}, and infrastructure ${summary.avgInfrastructure || 0}.`
 
   // Prepare chart data
   const pieData = {
@@ -256,14 +258,16 @@ function AssessmentResults() {
         <div className="charts-grid">
           <div className="card chart-card">
             <h2>Risk Distribution</h2>
+            <p className="chart-summary">{riskSummaryText}</p>
             <div className="chart-container" style={{ height: '300px' }}>
-              <Pie data={pieData} options={chartOptions} />
+              <Pie aria-hidden="true" data={pieData} options={chartOptions} />
             </div>
           </div>
           <div className="card chart-card">
             <h2>Average Component Scores</h2>
+            <p className="chart-summary">{componentSummaryText}</p>
             <div className="chart-container" style={{ height: '300px' }}>
-              <Bar data={barData} options={barOptions} />
+              <Bar aria-hidden="true" data={barData} options={barOptions} />
             </div>
           </div>
         </div>
@@ -296,16 +300,19 @@ function AssessmentResults() {
           {records.length > 0 ? (
             <div className="table-responsive">
               <table className="data-table">
+                <caption className="table-caption">
+                  Assessment records filtered by risk level. {riskSummaryText}
+                </caption>
                 <thead>
                   <tr>
-                    <th>Location</th>
-                    <th>Risk Level</th>
-                    <th>Risk Score</th>
-                    <th>Water Quality</th>
-                    <th>Distance</th>
-                    <th>Reliability</th>
-                    <th>Population</th>
-                    <th>Infrastructure</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">Risk Level</th>
+                    <th scope="col">Risk Score</th>
+                    <th scope="col">Water Quality</th>
+                    <th scope="col">Distance</th>
+                    <th scope="col">Reliability</th>
+                    <th scope="col">Population</th>
+                    <th scope="col">Infrastructure</th>
                   </tr>
                 </thead>
                 <tbody>
