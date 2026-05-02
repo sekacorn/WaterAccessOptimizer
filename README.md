@@ -1,21 +1,116 @@
 # WaterAccessOptimizer
 
-WaterAccessOptimizer is an open-source web application for uploading water-access datasets, visualizing mapped records, and running explainable risk assessments.
+WaterAccessOptimizer is a free, inspectable, self-hostable water access planning tool for mission-driven teams that need to upload field data, map communities and water infrastructure, and run explainable risk assessments without paying for a closed commercial platform.
 
-This release is centered on the current MVP workflow:
+## The Problem
 
-- authenticate or use demo mode
-- upload hydrological, community, and infrastructure CSV data
-- inspect communities and facilities on the map
-- create and run risk assessments
-- review charts, tables, and exports
+Nonprofits, universities, researchers, students, public agencies, and public-interest teams often need practical software for water security work, but the tools available to them can be expensive, hard to modify, or locked behind vendor workflows. That creates several concrete problems:
 
-## Status
+- Cost: small teams may not have budget for recurring software licenses, hosted GIS products, analytics platforms, or custom dashboards.
+- Access: students, field researchers, and community organizations may need tools they can run locally for teaching, pilots, grant work, or field validation.
+- Research transparency: water access decisions should be traceable to source data, scoring logic, and documented assumptions instead of hidden inside black-box services.
+- Workflow friction: teams often manage hydrological measurements, community survey data, infrastructure records, map review, and risk reports in separate tools.
+- Privacy and compliance readiness: sensitive community and operational data may need to stay under the operator's control, with deployment-specific decisions about retention, access, incident response, and legal obligations.
+- Infrastructure constraints: many teams need a path that works on ordinary local development machines or low-cost servers before moving to larger cloud or Kubernetes deployments.
 
-- Release version: `1.0.0`
-- Frontend verification: `npm run lint`, `npm run test -- --run`, and `npm run build` pass in `frontend/`
-- Demo mode: available and useful for screenshots or walkthroughs
-- Primary deployment path for this release: `docker-compose.prod.yml`
+This repository addresses those problems by providing a runnable full-stack application that can be cloned, inspected, modified, and deployed by the organizations doing the work.
+
+## What This Solves
+
+WaterAccessOptimizer gives teams one practical starting point for water access analysis:
+
+- Upload hydrological, community, and infrastructure CSV datasets instead of stitching records together by hand.
+- Validate uploaded data for file size, required columns, coordinates, dates, enum values, storage quota, and other quality issues.
+- Review communities, facilities, and water measurements on a map using GeoJSON-style APIs and a Leaflet-based frontend.
+- Create water access risk assessments that combine water quality, access distance, infrastructure reliability, and population pressure.
+- Show risk levels, confidence levels, charts, tables, summaries, and exports so results can support research, planning, and stakeholder review.
+- Run a frontend-only demo mode with seeded mock data for walkthroughs, teaching, screenshots, or proposal discussions.
+- Self-host the release stack with Docker Compose using PostgreSQL, Spring backend services, a React frontend, optional AI/risk model service, Prometheus, and Grafana.
+
+The goal is not to replace local expertise or formal engineering review. The goal is to reduce software cost and give mission-driven teams a practical base they can adapt to their own water access data, research methods, and deployment constraints.
+
+## Who It Is For
+
+- Nonprofits working on water access, public health, climate resilience, WASH programs, or infrastructure planning.
+- Universities that need a teaching or research platform students can run and inspect.
+- Researchers who need reproducible workflows for water quality, service access, and infrastructure risk analysis.
+- Students building projects, theses, pilots, or public-interest prototypes.
+- Public-interest teams that need transparent, modifiable software instead of a closed vendor workflow.
+- Local agencies, civic technology groups, and grant-funded teams that need a low-cost starting point for data-informed water access planning.
+
+## Free / Low-Cost Use
+
+This project is licensed under the Apache License 2.0. The license grants a no-charge, royalty-free copyright license and patent license to use, reproduce, modify, prepare derivative works, publicly display, publicly perform, sublicense, and distribute the work, subject to the Apache-2.0 terms.
+
+In practical terms, eligible users can:
+
+```bash
+git clone <this-repository-url>
+cd WaterAccessOptimizer
+cp .env.example .env
+docker-compose -f docker-compose.prod.yml up -d --build
+```
+
+They can also fork the repository, adapt the code, run it locally, and deploy their own copy as long as they follow the Apache-2.0 license requirements, including preserving the license and required notices when redistributing modified versions.
+
+The software is provided "AS IS", without warranties or guarantees. Formal compliance, security hardening, privacy obligations, hosting costs, and operational procedures remain the responsibility of the organization deploying it.
+
+The LICENSE file lists:
+
+- Author: Sekacorn
+- Contact: Sekacorn@gmail.com
+- Copyright 2025 Sekacorn
+
+## What Is Included
+
+Current release surface:
+
+- React/Vite frontend in `frontend/`
+- Login, registration, protected routes, dashboard, upload, map, risk assessment, assessment results, privacy, accessibility, and security/compliance pages
+- Frontend demo mode using mock API data and an auto-seeded session
+- CSV upload workflows for hydrological, community, and infrastructure data
+- Upload history, soft delete behavior, and storage quota display
+- Map workflows using Leaflet and backend GeoJSON responses
+- Risk assessment workflows with HIGH, MEDIUM, and LOW risk levels
+- Assessment summaries, chart/table review, and result pages
+- Excel and PDF export endpoints for assessment reports
+- Java 17/Spring backend services for authentication, gateway/data runtime, and data/risk APIs
+- PostgreSQL-backed storage and database schema/migration files
+- Optional Python `ai-model/` rule-based risk scoring support with WHO-guideline-oriented factors
+- Docker Compose files for development and production-style local deployment
+- Nginx frontend container configuration
+- Prometheus and Grafana monitoring configuration
+- Kubernetes manifests in `k8s/`
+- Sample CSV datasets in `sample_data/`
+- Unit and E2E test coverage for frontend flows and selected backend services
+- Documentation for getting started, deployment, architecture, compliance readiness, API contracts, data ingestion, validation, operations, PostGIS queries, and service boundaries
+- Screenshots in the repository root and `frontend/demo-screenshots/`
+
+Current vs planned or reference material:
+
+- The primary documented release path is `docker-compose.prod.yml`.
+- `docker-compose.prod.yml` builds the packaged data service runtime from `backend/api-gateway/`.
+- A separate `backend/data-service/` exists with richer upload, map, risk, and export code, but the release docs identify it as not the primary packaged runtime path for this release.
+- Kubernetes files exist, but the current documentation treats Kubernetes as a separate validation effort.
+- Several older or exploratory backend modules remain in the repository, including collaboration, LLM, user-session, water-integrator, and water-visualizer services. They are useful as references or future work, but they should not be presented as the verified production path.
+- GeoJSON ingestion, natural-language querying, real-time collaboration, and some ML/LLM ideas are documented as future or exploratory work rather than fully verified MVP behavior.
+
+## Current Status
+
+WaterAccessOptimizer is best described as an MVP release / public-interest starter kit, not a turnkey certified production system.
+
+The frontend release path has been verified in the existing docs with:
+
+```bash
+cd frontend
+npm run lint
+npm run test -- --run
+npm run build
+```
+
+Backend and full-stack production readiness are deployment-specific. Before using it for live operational decisions, an operator should validate the backend services in their environment, configure real secrets, set TLS and hosting policy, review data retention and privacy obligations, run security testing, and confirm that the risk model and data assumptions fit the local context.
+
+The project includes compliance-readiness work for NIST-aligned secure development, GDPR-oriented privacy-by-design, and Section 508/WCAG accessibility readiness. It does not claim formal certification.
 
 ## Screenshots
 
@@ -38,20 +133,11 @@ This release is centered on the current MVP workflow:
 ![Additional View 1](./screenshot-6.png)
 ![Additional View 2](./screenshot-7.png)
 
-## What Is In Scope
-
-- React frontend in `frontend/`
-- Auth service in `backend/auth-service/`
-- Data service currently packaged from `backend/api-gateway/`
-- PostgreSQL-backed backend services
-- Optional AI model service in `ai-model/`
-- Optional Prometheus and Grafana in `docker-compose.prod.yml`
-
 ## Quick Start
 
-### Option 1: frontend demo mode
+### Frontend demo mode
 
-This is the fastest way to review the UI without logging in.
+Use this for UI review, teaching, screenshots, or a no-login walkthrough.
 
 ```bash
 cd frontend
@@ -59,14 +145,16 @@ npm install
 npm run dev:demo
 ```
 
-Open [http://localhost:5173](http://localhost:5173). Demo mode seeds an authenticated session and mock application data.
+Open [http://localhost:5173](http://localhost:5173).
 
-### Option 2: Docker release stack
+### Docker release stack
+
+Use this for the documented full-stack release path.
 
 ```bash
 cp .env.example .env
-# update secrets in .env
-docker-compose -f docker-compose.prod.yml up -d
+# Edit .env and replace placeholder secrets.
+docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
 Primary URLs:
@@ -78,96 +166,17 @@ Primary URLs:
 - Prometheus: [http://localhost:9090](http://localhost:9090)
 - Grafana: [http://localhost:3000](http://localhost:3000)
 
-## Local Development
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Useful scripts:
-
-- `npm run dev`
-- `npm run dev:demo`
-- `npm run lint`
-- `npm run test -- --run`
-- `npm run build`
-
-### Backend
-
-The backend is Java/Spring-based and requires Java 17+ and Maven.
-
-```bash
-cd backend/auth-service
-mvn spring-boot:run
-
-cd ../api-gateway
-mvn spring-boot:run
-```
-
-Current local defaults used by the frontend:
-
-- Auth API: `http://localhost:8081/api/v1/auth`
-- Data API: `http://localhost:8087/api/v1`
-
-## Architecture
-
-This repository still contains older modules and planning documents, but the current release surface is:
-
-```text
-frontend -> auth-service
-frontend -> data-service
-auth-service -> postgres
-data-service -> postgres
-optional: frontend/data-service -> ai-model
-```
-
-Important repo note:
-
-- `docker-compose.prod.yml` builds the release data service from `backend/api-gateway/`
-- there is also a separate `backend/data-service/` directory in the repo, but it is not the primary packaged runtime path for this release
-
-## Release Notes
-
-Recent release-prep fixes included:
-
-- accurate demo mode with seeded authenticated data
-- local Leaflet marker assets instead of remote icon URLs
-- safer persisted Zustand storage fallback behavior
-- unique notification IDs to avoid accidental multi-removal
-- tighter frontend verification surface and passing frontend tests
-- documentation updated to match real ports, commands, and runtime paths
-
 ## Documentation
 
-- Root release guides:
 - [GETTING_STARTED.md](./GETTING_STARTED.md)
 - [DEPLOYMENT.md](./DEPLOYMENT.md)
-- [docs/COMPLIANCE_READINESS.md](./docs/COMPLIANCE_READINESS.md)
 - [docs/ARCHITECTURE_OVERVIEW.md](./docs/ARCHITECTURE_OVERVIEW.md)
-- [docs/SERVICE_BOUNDARIES_MVP.md](./docs/SERVICE_BOUNDARIES_MVP.md)
-
-Reference and historical docs in `docs/` have been trimmed or marked accordingly so they do not override the release guides above.
-
-## Compliance Readiness
-
-This release is being prepared for:
-
-- NIST-aligned secure development readiness
-- GDPR-oriented privacy-by-design readiness
-- Section 508 and WCAG accessibility readiness
-
-It does not claim formal certification. The current implementation adds practical controls such as stronger secret handling, authentication safeguards, browser security headers, public privacy and accessibility pages, and improved keyboard and screen-reader support in key workflows.
-
-## Known Limits
-
-- Demo mode is frontend-only and uses mock data.
-- The repo contains legacy pages and service experiments that are not part of the current routed release surface.
-- Kubernetes files exist, but Docker Compose is the primary documented release path for this version.
+- [docs/COMPLIANCE_READINESS.md](./docs/COMPLIANCE_READINESS.md)
+- [docs/DATA_INGESTION_GUIDE.md](./docs/DATA_INGESTION_GUIDE.md)
+- [docs/DATA_VALIDATION_RULES.md](./docs/DATA_VALIDATION_RULES.md)
+- [docs/API_CONTRACTS_MVP.md](./docs/API_CONTRACTS_MVP.md)
+- [sample_data/README.md](./sample_data/README.md)
 
 ## License
 
-Apache-2.0. See [LICENSE](./LICENSE).
+Apache License 2.0. See [LICENSE](./LICENSE).
